@@ -1,0 +1,125 @@
+NAME
+    Setup::File::Symlink - Ensure symlink existence and target
+
+VERSION
+    version 0.04
+
+SYNOPSIS
+     use Setup::File::Symlink 'setup_symlink';
+
+     # simple usage (doesn't save undo data)
+     my $res = setup_symlink symlink => "/baz", target => "/qux";
+     die unless $res->[0] == 200;
+
+     # perform setup and save undo data (undo data should be serializable)
+     my $res = setup_symlink symlink => "/foo", target => "/bar",
+                             -undo_action => 'do';
+     die unless $res->[0] == 200;
+     my $undo_data = $res->[3]{undo_data};
+
+     # perform undo
+     my $res = setup_symlink symlink => "/symlink", target=>"/target",
+                             -undo_action => "undo", -undo_data=>$undo_data;
+     die unless $res->[0] == 200;
+
+DESCRIPTION
+    This module provides one function setup_symlink.
+
+    This module is part of the Setup modules family.
+
+    This module uses Log::Any logging framework.
+
+    This module's functions have Sub::Spec specs.
+
+THE SETUP MODULES FAMILY
+    I use the "Setup::" namespace for the Setup modules family, typically
+    used in installers (or other applications). The modules in Setup family
+    have these characteristics:
+
+    *   used to reach some desired state
+
+        For example, Setup::File::Symlink::setup_symlink makes sure a
+        symlink exists to the desired target. Setup::File::setup_file makes
+        sure a file exists with the correct content/ownership/permission.
+
+    *   do nothing if desired state has been reached
+
+    *   support dry-run (simulation) mode
+
+    *   support undo to restore state to previous/original one
+
+FUNCTIONS
+    None are exported by default, but they are exportable.
+
+  setup_symlink(%args) -> [STATUS_CODE, ERR_MSG, RESULT]
+    Create symlink or fix symlink target.
+
+    Returns a 3-element arrayref. STATUS_CODE is 200 on success, or an error
+    code between 3xx-5xx (just like in HTTP). ERR_MSG is a string containing
+    error message, RESULT is the actual result.
+
+    This function supports undo operation. See Sub::Spec::Clause::features
+    for details on how to perform do/undo/redo.
+
+    This function supports dry-run (simulation) mode. To run in dry-run
+    mode, add argument "-dry_run" => 1.
+
+    Arguments ("*" denotes required arguments):
+
+    *   target* => *str*
+
+        Target path of symlink.
+
+    *   symlink* => *str*
+
+        Path to symlink.
+
+        Symlink path needs to be absolute so it's normalized.
+
+    *   create* => *bool* (default 1)
+
+        Create if symlink doesn't exist.
+
+        If set to false, then setup will fail (412) if this condition is
+        encountered.
+
+    *   replace_dir* => *bool* (default 0)
+
+        Replace if there is existing dir.
+
+        If set to false, then setup will fail (412) if this condition is
+        encountered.
+
+        NOTE: Not yet implemented, so will always fail under this condition.
+
+    *   replace_file* => *bool* (default 0)
+
+        Replace if there is existing non-symlink file.
+
+        If set to false, then setup will fail (412) if this condition is
+        encountered.
+
+        NOTE: Not yet implemented, so will always fail under this condition.
+
+    *   replace_symlink* => *bool* (default 1)
+
+        Replace previous symlink if it already exists but doesn't point to
+        the wanted target.
+
+        If set to false, then setup will fail (412) if this condition is
+        encountered.
+
+SEE ALSO
+    Sub::Spec, specifically Sub::Spec::Clause::features on dry-run/undo.
+
+    Other modules in Setup:: namespace.
+
+AUTHOR
+    Steven Haryanto <stevenharyanto@gmail.com>
+
+COPYRIGHT AND LICENSE
+    This software is copyright (c) 2011 by Steven Haryanto.
+
+    This is free software; you can redistribute it and/or modify it under
+    the same terms as the Perl 5 programming language system itself.
+

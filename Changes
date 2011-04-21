@@ -1,0 +1,42 @@
+Revision history for Setup-File-Symlink
+
+0.05    2011-04-21
+
+        No functional change.
+
+        [INCOMPATIBLE CHANGE]
+
+        - Rename module from Setup::Symlink to Setup::File::Symlink.
+
+
+0.04    2011-04-21
+
+        No functional change.
+
+        [ETC]
+
+        - Change Abstract to be more consistent with other Setup::* modules.
+
+
+0.03    2011-04-18
+
+        [ETC]
+
+        - Some sub spec tweaks.
+
+        - Change terminology: undo/redo info -> undo/redo data.
+
+
+0.02    2011-04-13
+
+        [ETC]
+
+        - Minor documentation & sub spec patches.
+
+        - Build fixes: exclude backup files, add missing dependency
+          (File::chdir, Log::Any) [cpants]
+
+
+0.01    2011-04-08
+
+        - First release.
