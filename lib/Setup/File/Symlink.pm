@@ -1,6 +1,6 @@
 package Setup::File::Symlink;
 BEGIN {
-  $Setup::File::Symlink::VERSION = '0.04';
+  $Setup::File::Symlink::VERSION = '0.05';
 }
 # ABSTRACT: Ensure symlink existence and target
 
@@ -166,7 +166,7 @@ Setup::File::Symlink - Ensure symlink existence and target
 
 =head1 VERSION
 
-version 0.04
+version 0.05
 
 =head1 SYNOPSIS
 
