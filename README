@@ -2,7 +2,7 @@ NAME
     Setup::File::Symlink - Ensure symlink existence and target
 
 VERSION
-    version 0.07
+    version 0.08
 
 SYNOPSIS
      use Setup::File::Symlink 'setup_symlink';

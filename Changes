@@ -1,5 +1,14 @@
 Revision history for Setup-File-Symlink
 
+0.08    2011-04-27
+
+        [BUG FIXES]
+
+        - Return 500 on rollback.
+
+        - A couple small fixes.
+
+
 0.07    2011-04-27
 
         [ENHANCEMENTS]

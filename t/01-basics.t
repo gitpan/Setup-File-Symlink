@@ -133,7 +133,6 @@ test_setup_symlink(
         is(readlink("$rootdir/s"), "$rootdir/t", "old symlink restored");
     },
 );
-goto DONE_TESTING;
 test_setup_symlink(
     name       => "replace symlink (redo)",
     symlink    => "/s",

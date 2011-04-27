@@ -1,6 +1,6 @@
 package Setup::File::Symlink;
 BEGIN {
-  $Setup::File::Symlink::VERSION = '0.07';
+  $Setup::File::Symlink::VERSION = '0.08';
 }
 # ABSTRACT: Ensure symlink existence and target
 
@@ -126,12 +126,12 @@ sub setup_symlink {
                 if (!$replace_dir) {
                     return [412, "must replace dir but instructed not to"];
                 }
-                push @$steps, ["rm"], ["ln"];
+                push @$steps, ["rm_r"], ["ln"];
             } else {
                 if (!$replace_file) {
                     return [412, "must replace file but instructed not to"];
                 }
-                push @$steps, ["rm"], ["ln"];
+                push @$steps, ["rm_r"], ["ln"];
             }
         } elsif ($is_symlink && $cur_target ne $target) {
             $log->tracef("nok: symlink doesn't point to correct target");
@@ -150,8 +150,7 @@ sub setup_symlink {
 
     return [400, "Invalid steps, must be an array"]
         unless $steps && ref($steps) eq 'ARRAY';
-
-    return [200, "Dry run"] if $dry_run;
+    return [200, "Dry run"] if $dry_run && @$steps;
 
     # create tmp dir for undo
     my $save_undo    = $undo_action ? 1:0;
@@ -159,47 +158,51 @@ sub setup_symlink {
     return [400, "Invalid -undo_hint, please supply a hashref"]
         unless ref($undo_hint) eq 'HASH';
     my $tmp_dir = $undo_hint->{tmp_dir} // "$ENV{HOME}/.setup";
-    if ($save_undo && !(-d $tmp_dir)) {
+    if ($save_undo && !(-d $tmp_dir) && !$dry_run) {
         mkdir $tmp_dir or return [500, "Can't make temp dir `$tmp_dir`: $!"];
     }
     my $save_path = "$tmp_dir/".UUID::Random::generate;
 
     # perform the steps
-    my $is_rollback;
+    my $rollback;
     my $undo_steps = [];
   STEPS:
     for my $i (0..@$steps-1) {
         my $step = $steps->[$i];
+        next unless defined $step; # can happen even when steps=[], due to redo
         $log->tracef("step %d of 0..%d: %s", $i, @$steps-1, $step);
         my $err;
         return [400, "Invalid step (not array)"] unless ref($step) eq 'ARRAY';
         if ($step->[0] eq 'rmsym') {
-            if ($exists) {
+            if ((-l $symlink) || (-e _)) {
+                my $t = readlink($symlink) // "";
                 if (unlink $symlink) {
-                    unshift @$undo_steps, ["ln", $cur_target];
+                    unshift @$undo_steps, ["ln", $t];
                 } else {
                     $err = "Can't remove $symlink: $!";
                 }
             }
-        } elsif ($step->[0] eq 'rm') {
-            if ($exists) {
+        } elsif ($step->[0] eq 'rm_r') {
+            if ((-l $symlink) || (-e _)) {
                 # do not bother to save file/dir if not asked
                 if ($save_undo) {
                     if (rmove $symlink, $save_path) {
                         unshift @$undo_steps, ["restore", $save_path];
-                    } elsif ((-l $symlink) || (-e _)) {
+                    } else {
                         $err = "Can't move file/dir $symlink -> $save_path: $!";
                     }
                 } else {
                     remove_tree($symlink, {error=>\my $e});
-                    if (@$e && ((-l $symlink) || (-e _))) {
+                    if (@$e) {
                         $err = "Can't remove file/dir $symlink: ".dumpp($e);
                     }
                 }
             }
         } elsif ($step->[0] eq 'restore') {
-            if (rmove $step->[1], $symlink) {
-                unshift @$undo_steps, ["rm"];
+            if ((-l $symlink) || (-e _)) {
+                $err = "Can't restore $step->[1] -> $symlink: already exists";
+            } elsif (rmove $step->[1], $symlink) {
+                unshift @$undo_steps, ["rm_r"];
             } else {
                 $err = "Can't restore $step->[1] -> $symlink: $!";
             }
@@ -209,27 +212,29 @@ sub setup_symlink {
                 if (symlink $t, $symlink) {
                     unshift @$undo_steps, ["rmsym"];
                 } else {
-                    $err = "Can't symlink $symlink -> $target: $!";
+                    $err = "Can't symlink $symlink -> $t: $!";
                 }
             }
         } else {
             die "BUG: Unknown step command: $step->[0]";
         }
         if ($err) {
-            if ($is_rollback) {
+            if ($rollback) {
                 die "Failed rollback step $i of 0..".(@$steps-1).": $err";
             } else {
                 $log->tracef("Step failed: $err, performing rollback ...");
-                $is_rollback++;
+                $rollback = $err;
                 $steps = $undo_steps;
                 redo STEPS;
             }
         }
     }
+    return [500, "Error (rollbacked): $rollback"] if $rollback;
 
     my $meta = {};
     if ($undo_action =~ /^(re)?do$/) { $meta->{undo_data} = $undo_steps }
     elsif ($undo_action eq 'undo')   { $meta->{redo_data} = $undo_steps }
+    $log->tracef("meta: %s", $meta);
     return [@$steps ? 200 : 304,
             @$steps ? "OK" : "Nothing done",
             undef,
@@ -247,7 +252,7 @@ Setup::File::Symlink - Ensure symlink existence and target
 
 =head1 VERSION
 
-version 0.07
+version 0.08
 
 =head1 SYNOPSIS
 
