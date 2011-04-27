@@ -14,11 +14,16 @@ meta-spec:
   version: 1.4
 name: Setup-File-Symlink
 requires:
+  Data::Dump::Partial: 0
+  File::Copy::Recursive: 0
+  File::Path: 2.08
+  File::Slurp: 0
   File::chdir: 0
   Log::Any: 0
   Test::More: 0.96
+  UUID::Random: 0
   perl: 5.010000
 resources:
   homepage: http://search.cpan.org/dist/Setup-File-Symlink/
   repository: http://github.com/sharyanto/perl-Setup-File-Symlink
-version: 0.05
+version: 0.06

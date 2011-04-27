@@ -2,24 +2,30 @@ NAME
     Setup::File::Symlink - Ensure symlink existence and target
 
 VERSION
-    version 0.05
+    version 0.06
 
 SYNOPSIS
      use Setup::File::Symlink 'setup_symlink';
 
      # simple usage (doesn't save undo data)
      my $res = setup_symlink symlink => "/baz", target => "/qux";
-     die unless $res->[0] == 200;
+     die unless $res->[0] == 200 || $res->[0] == 304;
 
-     # perform setup and save undo data (undo data should be serializable)
+     # perform setup and save undo data
      my $res = setup_symlink symlink => "/foo", target => "/bar",
                              -undo_action => 'do';
-     die unless $res->[0] == 200;
+     die unless $res->[0] == 200 || $res->[0] == 304;
      my $undo_data = $res->[3]{undo_data};
 
      # perform undo
      my $res = setup_symlink symlink => "/symlink", target=>"/target",
                              -undo_action => "undo", -undo_data=>$undo_data;
+     die unless $res->[0] == 200;
+     my $redo_data = $res->[3]{redo_data};
+
+     # perform redo
+     my $res = setup_symlink symlink => "/symlink", target=>"/target",
+                             -undo_action => "redo", -redo_data=>$redo_data;
      die unless $res->[0] == 200;
 
 DESCRIPTION
@@ -44,7 +50,11 @@ THE SETUP MODULES FAMILY
 
     *   do nothing if desired state has been reached
 
+        Function should return 304 (nothing to do) status.
+
     *   support dry-run (simulation) mode
+
+        Function should return 200 on success, but change nothing.
 
     *   support undo to restore state to previous/original one
 
@@ -53,6 +63,19 @@ FUNCTIONS
 
   setup_symlink(%args) -> [STATUS_CODE, ERR_MSG, RESULT]
     Create symlink or fix symlink target.
+
+    On do, will create symlink which points to specified target. If symlink
+    already exists but points to another target, it will be replaced with
+    the correct symlink if replace_symlink option is true. If a file already
+    exists, it will be removed (or, backed up to temporary directory) before
+    the symlink is created, if replace_file option is true.
+
+    If given, -undo_hint should contain {tmp_dir=>...} to specify temporary
+    directory to save replaced file/dir. Temporary directory defaults to
+    ~/.setup, it will be created if not exists.
+
+    On undo, will restore the original symlink/ if it was replaced during
+    do.
 
     Returns a 3-element arrayref. STATUS_CODE is 200 on success, or an error
     code between 3xx-5xx (just like in HTTP). ERR_MSG is a string containing
@@ -90,16 +113,12 @@ FUNCTIONS
         If set to false, then setup will fail (412) if this condition is
         encountered.
 
-        NOTE: Not yet implemented, so will always fail under this condition.
-
     *   replace_file* => *bool* (default 0)
 
         Replace if there is existing non-symlink file.
 
         If set to false, then setup will fail (412) if this condition is
         encountered.
-
-        NOTE: Not yet implemented, so will always fail under this condition.
 
     *   replace_symlink* => *bool* (default 1)
 

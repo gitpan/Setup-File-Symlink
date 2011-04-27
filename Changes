@@ -1,5 +1,14 @@
 Revision history for Setup-File-Symlink
 
+0.06    2011-04-27
+
+        [ENHANCEMENTS]
+
+        - (Internal) refactor/reorganization.
+
+        - Implement replace_file & replace_dir.
+
+
 0.05    2011-04-21
 
         No functional change.

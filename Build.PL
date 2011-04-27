@@ -17,15 +17,20 @@ my %module_build_args = (
     'Steven Haryanto <stevenharyanto@gmail.com>'
   ],
   'dist_name' => 'Setup-File-Symlink',
-  'dist_version' => '0.05',
+  'dist_version' => '0.06',
   'license' => 'perl',
   'module_name' => 'Setup::File::Symlink',
   'recommends' => {},
   'recursive_test_files' => 1,
   'requires' => {
+    'Data::Dump::Partial' => '0',
+    'File::Copy::Recursive' => '0',
+    'File::Path' => '2.08',
+    'File::Slurp' => '0',
     'File::chdir' => '0',
     'Log::Any' => '0',
     'Test::More' => '0.96',
+    'UUID::Random' => '0',
     'perl' => '5.010000'
   },
   'script_files' => []
