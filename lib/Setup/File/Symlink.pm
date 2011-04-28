@@ -1,6 +1,6 @@
 package Setup::File::Symlink;
 BEGIN {
-  $Setup::File::Symlink::VERSION = '0.08';
+  $Setup::File::Symlink::VERSION = '0.09';
 }
 # ABSTRACT: Ensure symlink existence and target
 
@@ -94,6 +94,7 @@ _
 };
 sub setup_symlink {
     my %args        = @_;
+    $log->tracef("=> setup_symlink(%s)", \%args); # TMP
     my $dry_run     = $args{-dry_run};
     my $undo_action = $args{-undo_action} // "";
 
@@ -116,8 +117,6 @@ sub setup_symlink {
     my $steps;
     if ($undo_action eq 'undo') {
         $steps = $args{-undo_data} or return [400, "Please supply -undo_data"];
-    } elsif ($undo_action eq 'redo') {
-        $steps = $args{-redo_data} or return [400, "Please supply -redo_data"];
     } else {
         $steps = [];
         if ($exists && !$is_symlink) {
@@ -166,7 +165,7 @@ sub setup_symlink {
     # perform the steps
     my $rollback;
     my $undo_steps = [];
-  STEPS:
+  STEP:
     for my $i (0..@$steps-1) {
         my $step = $steps->[$i];
         next unless defined $step; # can happen even when steps=[], due to redo
@@ -225,20 +224,16 @@ sub setup_symlink {
                 $log->tracef("Step failed: $err, performing rollback ...");
                 $rollback = $err;
                 $steps = $undo_steps;
-                redo STEPS;
+                goto STEP; # perform steps all over again
             }
         }
     }
     return [500, "Error (rollbacked): $rollback"] if $rollback;
 
     my $meta = {};
-    if ($undo_action =~ /^(re)?do$/) { $meta->{undo_data} = $undo_steps }
-    elsif ($undo_action eq 'undo')   { $meta->{redo_data} = $undo_steps }
+    $meta->{undo_data} = $undo_steps if $save_undo;
     $log->tracef("meta: %s", $meta);
-    return [@$steps ? 200 : 304,
-            @$steps ? "OK" : "Nothing done",
-            undef,
-            $meta];
+    return [@$steps ? 200 : 304, @$steps ? "OK" : "Nothing done", undef, $meta];
 }
 
 1;
@@ -252,7 +247,7 @@ Setup::File::Symlink - Ensure symlink existence and target
 
 =head1 VERSION
 
-version 0.08
+version 0.09
 
 =head1 SYNOPSIS
 
@@ -272,12 +267,6 @@ version 0.08
  my $res = setup_symlink symlink => "/symlink", target=>"/target",
                          -undo_action => "undo", -undo_data=>$undo_data;
  die unless $res->[0] == 200;
- my $redo_data = $res->[3]{redo_data};
-
- # perform redo
- my $res = setup_symlink symlink => "/symlink", target=>"/target",
-                         -undo_action => "redo", -redo_data=>$redo_data;
- die unless $res->[0] == 200;
 
 =head1 DESCRIPTION
 
@@ -291,29 +280,9 @@ This module's functions have L<Sub::Spec> specs.
 
 =head1 THE SETUP MODULES FAMILY
 
-I use the C<Setup::> namespace for the Setup modules family, typically used in
-installers (or other applications). The modules in Setup family have these
-characteristics:
-
-=over 4
-
-=item * used to reach some desired state
-
-For example, Setup::File::Symlink::setup_symlink makes sure a symlink exists to
-the desired target. Setup::File::setup_file makes sure a file exists with the
-correct content/ownership/permission.
-
-=item * do nothing if desired state has been reached
-
-Function should return 304 (nothing to do) status.
-
-=item * support dry-run (simulation) mode
-
-Function should return 200 on success, but change nothing.
-
-=item * support undo to restore state to previous/original one
-
-=back
+I use the C<Setup::> namespace for the Setup modules family. See C<Setup::File>
+for more details on the goals, characteristics, and implementation of Setup
+modules family.
 
 =head1 FUNCTIONS
 
@@ -387,8 +356,6 @@ If set to false, then setup will fail (412) if this condition is encountered.
 =back
 
 =head1 SEE ALSO
-
-L<Sub::Spec>, specifically L<Sub::Spec::Clause::features> on dry-run/undo.
 
 Other modules in Setup:: namespace.
 

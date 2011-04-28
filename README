@@ -2,7 +2,7 @@ NAME
     Setup::File::Symlink - Ensure symlink existence and target
 
 VERSION
-    version 0.08
+    version 0.09
 
 SYNOPSIS
      use Setup::File::Symlink 'setup_symlink';
@@ -21,12 +21,6 @@ SYNOPSIS
      my $res = setup_symlink symlink => "/symlink", target=>"/target",
                              -undo_action => "undo", -undo_data=>$undo_data;
      die unless $res->[0] == 200;
-     my $redo_data = $res->[3]{redo_data};
-
-     # perform redo
-     my $res = setup_symlink symlink => "/symlink", target=>"/target",
-                             -undo_action => "redo", -redo_data=>$redo_data;
-     die unless $res->[0] == 200;
 
 DESCRIPTION
     This module provides one function setup_symlink.
@@ -38,25 +32,9 @@ DESCRIPTION
     This module's functions have Sub::Spec specs.
 
 THE SETUP MODULES FAMILY
-    I use the "Setup::" namespace for the Setup modules family, typically
-    used in installers (or other applications). The modules in Setup family
-    have these characteristics:
-
-    *   used to reach some desired state
-
-        For example, Setup::File::Symlink::setup_symlink makes sure a
-        symlink exists to the desired target. Setup::File::setup_file makes
-        sure a file exists with the correct content/ownership/permission.
-
-    *   do nothing if desired state has been reached
-
-        Function should return 304 (nothing to do) status.
-
-    *   support dry-run (simulation) mode
-
-        Function should return 200 on success, but change nothing.
-
-    *   support undo to restore state to previous/original one
+    I use the "Setup::" namespace for the Setup modules family. See
+    "Setup::File" for more details on the goals, characteristics, and
+    implementation of Setup modules family.
 
 FUNCTIONS
     None are exported by default, but they are exportable.
@@ -129,8 +107,6 @@ FUNCTIONS
         encountered.
 
 SEE ALSO
-    Sub::Spec, specifically Sub::Spec::Clause::features on dry-run/undo.
-
     Other modules in Setup:: namespace.
 
 AUTHOR

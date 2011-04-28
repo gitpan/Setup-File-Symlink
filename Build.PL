@@ -17,7 +17,7 @@ my %module_build_args = (
     'Steven Haryanto <stevenharyanto@gmail.com>'
   ],
   'dist_name' => 'Setup-File-Symlink',
-  'dist_version' => '0.08',
+  'dist_version' => '0.09',
   'license' => 'perl',
   'module_name' => 'Setup::File::Symlink',
   'recommends' => {},
@@ -29,6 +29,7 @@ my %module_build_args = (
     'File::Slurp' => '0',
     'File::chdir' => '0',
     'Log::Any' => '0',
+    'Sub::Spec' => '0.13',
     'Test::More' => '0.96',
     'UUID::Random' => '0',
     'perl' => '5.010000'

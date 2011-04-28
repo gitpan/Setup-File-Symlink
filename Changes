@@ -1,12 +1,24 @@
 Revision history for Setup-File-Symlink
 
+0.09    2011-04-28
+
+        [INCOMPATIBLE CHANGES]
+
+        - Update undo protocol to Sub::Spec 0.13, there's no longer redo_data,
+          only undo_data.
+
+        [BUG FIXES]
+
+        - Small fixes.
+
+
 0.08    2011-04-27
 
         [BUG FIXES]
 
         - Return 500 on rollback.
 
-        - A couple small fixes.
+        - A couple of small fixes.
 
 
 0.07    2011-04-27

@@ -76,7 +76,7 @@ test_setup_symlink(
     exists     => 0,
     posttest   => sub {
         my $res = shift;
-        $redo_data = $res->[3]{redo_data};
+        $redo_data = $res->[3]{undo_data};
     }
 );
 test_setup_symlink(
@@ -92,7 +92,7 @@ test_setup_symlink(
     name       => "create (redo)",
     symlink    => "/s",
     target     => "/t",
-    other_args => {-undo_action=>"redo", -redo_data=>$redo_data},
+    other_args => {-undo_action=>"undo", -undo_data=>$redo_data},
     status     => 200,
     exists     => 1,
 );
@@ -129,7 +129,7 @@ test_setup_symlink(
     skip_test_target => 1,
     posttest   => sub {
         my $res = shift;
-        $redo_data = $res->[3]{redo_data};
+        $redo_data = $res->[3]{undo_data};
         is(readlink("$rootdir/s"), "$rootdir/t", "old symlink restored");
     },
 );
@@ -137,7 +137,7 @@ test_setup_symlink(
     name       => "replace symlink (redo)",
     symlink    => "/s",
     target     => "/t2",
-    other_args => {-undo_action=>"redo", -redo_data=>$redo_data},
+    other_args => {-undo_action=>"undo", -undo_data=>$redo_data},
     status     => 200,
     skip_test_target => 1,
     posttest   => sub {
@@ -182,7 +182,7 @@ test_setup_symlink(
     is_symlink => 0,
     posttest   => sub {
         my $res = shift;
-        $redo_data = $res->[3]{redo_data};
+        $redo_data = $res->[3]{undo_data};
         ok((-f "$rootdir/s"), "old file restored");
         is(read_file("$rootdir/s"), "test", "old file content restored");
     },
@@ -205,7 +205,7 @@ test_setup_symlink(
     symlink    => "/s",
     target     => "/t",
     other_args => {replace_file=>1,
-                   -undo_action=>"redo", -redo_data=>$redo_data},
+                   -undo_action=>"undo", -undo_data=>$redo_data},
     status     => 200,
 );
 
@@ -236,7 +236,7 @@ test_setup_symlink(
     is_symlink => 0,
     posttest   => sub {
         my $res = shift;
-        $redo_data = $res->[3]{redo_data};
+        $redo_data = $res->[3]{undo_data};
         ok((-d "$rootdir/s"), "old dir restored");
         ok((-f "$rootdir/s/f"), "old dir content restored 1");
         is(read_file("$rootdir/s/f"), "test", "old dir content restored 2");
@@ -260,7 +260,7 @@ test_setup_symlink(
     symlink    => "/s",
     target     => "/t",
     other_args => {replace_dir=>1,
-                   -undo_action=>"redo", -redo_data=>$redo_data},
+                   -undo_action=>"undo", -undo_data=>$redo_data},
     status     => 200,
 );
 
