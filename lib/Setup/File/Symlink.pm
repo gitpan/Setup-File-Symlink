@@ -1,6 +1,6 @@
 package Setup::File::Symlink;
 BEGIN {
-  $Setup::File::Symlink::VERSION = '0.10';
+  $Setup::File::Symlink::VERSION = '0.11';
 }
 # ABSTRACT: Setup symlink (existence, target)
 
@@ -120,7 +120,7 @@ sub setup_symlink {
     } else {
         $steps = [];
         if ($exists && !$is_symlink) {
-            $log->infof("nok: exist but not a symlink");
+            $log->infof("nok: $symlink exists but not a symlink");
             if ($is_dir) {
                 if (!$replace_dir) {
                     return [412, "must replace dir but instructed not to"];
@@ -133,13 +133,13 @@ sub setup_symlink {
                 push @$steps, ["rm_r"], ["ln"];
             }
         } elsif ($is_symlink && $cur_target ne $target) {
-            $log->infof("nok: symlink doesn't point to correct target");
+            $log->infof("nok: $symlink doesn't point to correct target");
             if (!$replace_sym) {
                 return [412, "must replace symlink but instructed not to"];
             }
             push @$steps, ["rmsym"], ["ln"];
         } elsif (!$exists) {
-            $log->infof("nok: doesn't exist");
+            $log->infof("nok: $symlink doesn't exist");
             if (!$create) {
                 return [412, "must create symlink but instructed not to"];
             }
@@ -246,7 +246,7 @@ Setup::File::Symlink - Setup symlink (existence, target)
 
 =head1 VERSION
 
-version 0.10
+version 0.11
 
 =head1 SYNOPSIS
 
