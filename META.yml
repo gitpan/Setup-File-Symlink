@@ -1,5 +1,5 @@
 ---
-abstract: 'Ensure symlink existence and target'
+abstract: 'Setup symlink (existence, target)'
 author:
   - 'Steven Haryanto <stevenharyanto@gmail.com>'
 build_requires:
@@ -27,4 +27,4 @@ requires:
 resources:
   homepage: http://search.cpan.org/dist/Setup-File-Symlink/
   repository: http://github.com/sharyanto/perl-Setup-File-Symlink
-version: 0.09
+version: 0.10

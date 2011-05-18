@@ -1,8 +1,8 @@
 package Setup::File::Symlink;
 BEGIN {
-  $Setup::File::Symlink::VERSION = '0.09';
+  $Setup::File::Symlink::VERSION = '0.10';
 }
-# ABSTRACT: Ensure symlink existence and target
+# ABSTRACT: Setup symlink (existence, target)
 
 use 5.010;
 use strict;
@@ -21,7 +21,7 @@ our @EXPORT_OK = qw(setup_symlink);
 our %SPEC;
 
 $SPEC{setup_symlink} = {
-    summary  => "Create symlink or fix symlink target",
+    summary  => "Setup symlink (existence, target)",
     description => <<'_',
 
 On do, will create symlink which points to specified target. If symlink already
@@ -34,7 +34,8 @@ If given, -undo_hint should contain {tmp_dir=>...} to specify temporary
 directory to save replaced file/dir. Temporary directory defaults to ~/.setup,
 it will be created if not exists.
 
-On undo, will restore the original symlink/ if it was replaced during do.
+On undo, will delete symlink if it was created by this function, and restore the
+original symlink/file/dir if it was replaced during do.
 
 _
     args     => {
@@ -94,7 +95,6 @@ _
 };
 sub setup_symlink {
     my %args        = @_;
-    $log->tracef("=> setup_symlink(%s)", \%args); # TMP
     my $dry_run     = $args{-dry_run};
     my $undo_action = $args{-undo_action} // "";
 
@@ -120,7 +120,7 @@ sub setup_symlink {
     } else {
         $steps = [];
         if ($exists && !$is_symlink) {
-            $log->tracef("nok: exist but not a symlink");
+            $log->infof("nok: exist but not a symlink");
             if ($is_dir) {
                 if (!$replace_dir) {
                     return [412, "must replace dir but instructed not to"];
@@ -133,13 +133,13 @@ sub setup_symlink {
                 push @$steps, ["rm_r"], ["ln"];
             }
         } elsif ($is_symlink && $cur_target ne $target) {
-            $log->tracef("nok: symlink doesn't point to correct target");
+            $log->infof("nok: symlink doesn't point to correct target");
             if (!$replace_sym) {
                 return [412, "must replace symlink but instructed not to"];
             }
             push @$steps, ["rmsym"], ["ln"];
         } elsif (!$exists) {
-            $log->tracef("nok: doesn't exist");
+            $log->infof("nok: doesn't exist");
             if (!$create) {
                 return [412, "must create symlink but instructed not to"];
             }
@@ -168,7 +168,6 @@ sub setup_symlink {
   STEP:
     for my $i (0..@$steps-1) {
         my $step = $steps->[$i];
-        next unless defined $step; # can happen even when steps=[], due to redo
         $log->tracef("step %d of 0..%d: %s", $i, @$steps-1, $step);
         my $err;
         return [400, "Invalid step (not array)"] unless ref($step) eq 'ARRAY';
@@ -243,11 +242,11 @@ sub setup_symlink {
 
 =head1 NAME
 
-Setup::File::Symlink - Ensure symlink existence and target
+Setup::File::Symlink - Setup symlink (existence, target)
 
 =head1 VERSION
 
-version 0.09
+version 0.10
 
 =head1 SYNOPSIS
 
@@ -280,7 +279,7 @@ This module's functions have L<Sub::Spec> specs.
 
 =head1 THE SETUP MODULES FAMILY
 
-I use the C<Setup::> namespace for the Setup modules family. See C<Setup::File>
+I use the C<Setup::> namespace for the Setup modules family. See L<Setup::File>
 for more details on the goals, characteristics, and implementation of Setup
 modules family.
 
@@ -291,7 +290,7 @@ None are exported by default, but they are exportable.
 =head2 setup_symlink(%args) -> [STATUS_CODE, ERR_MSG, RESULT]
 
 
-Create symlink or fix symlink target.
+Setup symlink (existence, target).
 
 On do, will create symlink which points to specified target. If symlink already
 exists but points to another target, it will be replaced with the correct
@@ -303,7 +302,8 @@ If given, -undo_hint should contain {tmp_dir=>...} to specify temporary
 directory to save replaced file/dir. Temporary directory defaults to ~/.setup,
 it will be created if not exists.
 
-On undo, will restore the original symlink/ if it was replaced during do.
+On undo, will delete symlink if it was created by this function, and restore the
+original symlink/file/dir if it was replaced during do.
 
 Returns a 3-element arrayref. STATUS_CODE is 200 on success, or an error code
 between 3xx-5xx (just like in HTTP). ERR_MSG is a string containing error

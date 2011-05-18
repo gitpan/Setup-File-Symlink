@@ -1,8 +1,8 @@
 NAME
-    Setup::File::Symlink - Ensure symlink existence and target
+    Setup::File::Symlink - Setup symlink (existence, target)
 
 VERSION
-    version 0.09
+    version 0.10
 
 SYNOPSIS
      use Setup::File::Symlink 'setup_symlink';
@@ -33,14 +33,14 @@ DESCRIPTION
 
 THE SETUP MODULES FAMILY
     I use the "Setup::" namespace for the Setup modules family. See
-    "Setup::File" for more details on the goals, characteristics, and
+    Setup::File for more details on the goals, characteristics, and
     implementation of Setup modules family.
 
 FUNCTIONS
     None are exported by default, but they are exportable.
 
   setup_symlink(%args) -> [STATUS_CODE, ERR_MSG, RESULT]
-    Create symlink or fix symlink target.
+    Setup symlink (existence, target).
 
     On do, will create symlink which points to specified target. If symlink
     already exists but points to another target, it will be replaced with
@@ -52,8 +52,8 @@ FUNCTIONS
     directory to save replaced file/dir. Temporary directory defaults to
     ~/.setup, it will be created if not exists.
 
-    On undo, will restore the original symlink/ if it was replaced during
-    do.
+    On undo, will delete symlink if it was created by this function, and
+    restore the original symlink/file/dir if it was replaced during do.
 
     Returns a 3-element arrayref. STATUS_CODE is 200 on success, or an error
     code between 3xx-5xx (just like in HTTP). ERR_MSG is a string containing
