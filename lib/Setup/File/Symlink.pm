@@ -1,6 +1,6 @@
 package Setup::File::Symlink;
-BEGIN {
-  $Setup::File::Symlink::VERSION = '0.11';
+{
+  $Setup::File::Symlink::VERSION = '0.12';
 }
 # ABSTRACT: Setup symlink (existence, target)
 
@@ -172,6 +172,7 @@ sub setup_symlink {
         my $err;
         return [400, "Invalid step (not array)"] unless ref($step) eq 'ARRAY';
         if ($step->[0] eq 'rmsym') {
+            $log->info("Removing symlink $symlink ...");
             if ((-l $symlink) || (-e _)) {
                 my $t = readlink($symlink) // "";
                 if (unlink $symlink) {
@@ -181,6 +182,7 @@ sub setup_symlink {
                 }
             }
         } elsif ($step->[0] eq 'rm_r') {
+            $log->info("Removing file/dir $symlink ...");
             if ((-l $symlink) || (-e _)) {
                 # do not bother to save file/dir if not asked
                 if ($save_undo) {
@@ -197,6 +199,7 @@ sub setup_symlink {
                 }
             }
         } elsif ($step->[0] eq 'restore') {
+            $log->info("Restoring from $step->[1] -> $symlink ...");
             if ((-l $symlink) || (-e _)) {
                 $err = "Can't restore $step->[1] -> $symlink: already exists";
             } elsif (rmove $step->[1], $symlink) {
@@ -206,6 +209,7 @@ sub setup_symlink {
             }
         } elsif ($step->[0] eq 'ln') {
             my $t = $step->[1] // $target;
+            $log->info("Creating symlink $symlink -> $t ...");
             unless ((-l $symlink) && readlink($symlink) eq $t) {
                 if (symlink $t, $symlink) {
                     unshift @$undo_steps, ["rmsym"];
@@ -246,7 +250,7 @@ Setup::File::Symlink - Setup symlink (existence, target)
 
 =head1 VERSION
 
-version 0.11
+version 0.12
 
 =head1 SYNOPSIS
 
@@ -275,7 +279,7 @@ This module is part of the Setup modules family.
 
 This module uses L<Log::Any> logging framework.
 
-This module's functions have L<Sub::Spec> specs.
+This module has L<Rinci> metadata.
 
 =head1 THE SETUP MODULES FAMILY
 
@@ -365,7 +369,7 @@ Steven Haryanto <stevenharyanto@gmail.com>
 
 =head1 COPYRIGHT AND LICENSE
 
-This software is copyright (c) 2011 by Steven Haryanto.
+This software is copyright (c) 2012 by Steven Haryanto.
 
 This is free software; you can redistribute it and/or modify it under
 the same terms as the Perl 5 programming language system itself.

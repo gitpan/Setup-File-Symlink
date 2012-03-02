@@ -2,7 +2,7 @@ NAME
     Setup::File::Symlink - Setup symlink (existence, target)
 
 VERSION
-    version 0.11
+    version 0.12
 
 SYNOPSIS
      use Setup::File::Symlink 'setup_symlink';
@@ -29,7 +29,7 @@ DESCRIPTION
 
     This module uses Log::Any logging framework.
 
-    This module's functions have Sub::Spec specs.
+    This module has Rinci metadata.
 
 THE SETUP MODULES FAMILY
     I use the "Setup::" namespace for the Setup modules family. See
@@ -113,7 +113,7 @@ AUTHOR
     Steven Haryanto <stevenharyanto@gmail.com>
 
 COPYRIGHT AND LICENSE
-    This software is copyright (c) 2011 by Steven Haryanto.
+    This software is copyright (c) 2012 by Steven Haryanto.
 
     This is free software; you can redistribute it and/or modify it under
     the same terms as the Perl 5 programming language system itself.
