@@ -1,8 +1,4 @@
 package Setup::File::Symlink;
-{
-  $Setup::File::Symlink::VERSION = '0.12';
-}
-# ABSTRACT: Setup symlink (existence, target)
 
 use 5.010;
 use strict;
@@ -17,6 +13,8 @@ use UUID::Random;
 require Exporter;
 our @ISA       = qw(Exporter);
 our @EXPORT_OK = qw(setup_symlink);
+
+our $VERSION = '0.13'; # VERSION
 
 our %SPEC;
 
@@ -240,8 +238,10 @@ sub setup_symlink {
 }
 
 1;
+# ABSTRACT: Setup symlink (existence, target)
 
 
+__END__
 =pod
 
 =head1 NAME
@@ -250,7 +250,7 @@ Setup::File::Symlink - Setup symlink (existence, target)
 
 =head1 VERSION
 
-version 0.12
+version 0.13
 
 =head1 SYNOPSIS
 
@@ -375,7 +375,4 @@ This is free software; you can redistribute it and/or modify it under
 the same terms as the Perl 5 programming language system itself.
 
 =cut
-
-
-__END__
 
