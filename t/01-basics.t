@@ -9,260 +9,96 @@ use File::chdir;
 use File::Slurp;
 use File::Temp qw(tempdir);
 use Setup::File::Symlink qw(setup_symlink);
+use Test::Setup qw(test_setup);
 
 plan skip_all => "symlink() not available"
     unless eval { symlink "", ""; 1 };
 
 my $rootdir = tempdir(CLEANUP=>1);
 $CWD = $rootdir;
-my $undo_data;
-my $redo_data;
 
 test_setup_symlink(
-    name       => "create (dry run)",
-    symlink    => "/s",
-    target     => "/t",
-    other_args => {-dry_run=>1},
-    status     => 200,
-    exists     => 0,
+    name          => "create",
+    symlink       => "/s",
+    target        => "/t",
+    other_args    => {},
+    check_unsetup => {exists=>0},
+    check_setup   => {},
+    cleanup       => sub { unlink "s" },
 );
 test_setup_symlink(
-    name       => "create",
-    symlink    => "/s",
-    target     => "/t",
-    other_args => {},
-    status     => 200,
-    posttest   => sub {
-        my $res = shift;
-        $undo_data = $res->[3]{undo_data};
-        ok(!$undo_data, "no undo data");
-    },
-    cleanup    => 1,
+    name          => "do not create",
+    symlink       => "/s",
+    target        => "/t",
+    other_args    => {create=>0},
+    check_unsetup => {exists=>0},
+    arg_error     => 1, # 412
 );
 test_setup_symlink(
-    name       => "create (with undo)",
-    symlink    => "/s",
-    target     => "/t",
-    other_args => {-undo_action=>"do"},
-    status     => 200,
-    posttest   => sub {
-        my $res = shift;
-        $undo_data = $res->[3]{undo_data};
-        ok($undo_data, "there is undo data");
-    },
+    name          => "replace symlink",
+    prepare       => sub { symlink "t", "s" },
+    symlink       => "/s",
+    target        => "/t2",
+    other_args    => {},
+    check_unsetup => {target=>"t"},
+    check_setup   => {target=>"$rootdir/t2"},
+    cleanup       => sub { unlink "s" },
 );
 test_setup_symlink(
-    name       => "unchanged",
-    symlink    => "/s",
-    target     => "/t",
-    other_args => {},
-    status     => 304,
+    name          => "do not replace_symlink",
+    prepare       => sub { symlink "t", "s" },
+    symlink       => "/s",
+    target        => "/t2",
+    other_args    => {replace_symlink=>0},
+    check_unsetup => {target=>"t"},
+    arg_error     => 1, # 412
+    cleanup       => sub { unlink "s" },
 );
 test_setup_symlink(
-    name       => "do not create",
-    symlink    => "/s2",
-    target     => "/t",
-    other_args => {create=>0},
-    status     => 412,
-    exists     => 0,
-);
-# XXX create (undo, dry run)
-test_setup_symlink(
-    name       => "create (undo)",
-    symlink    => "/s",
-    target     => "/t",
-    other_args => {-undo_action=>"undo", -undo_data=>$undo_data},
-    status     => 200,
-    exists     => 0,
-    posttest   => sub {
-        my $res = shift;
-        $redo_data = $res->[3]{undo_data};
-    }
+    name          => "replace file",
+    prepare       => sub { write_file "s", "test" },
+    symlink       => "/s",
+    target        => "/t",
+    other_args    => {replace_file=>1},
+    check_unsetup => {is_symlink=>0},
+    check_setup   => {target=>"$rootdir/t"},
+    cleanup       => sub { unlink "s" },
 );
 test_setup_symlink(
-    name       => "create (repeat undo, still success)",
-    symlink    => "/s",
-    target     => "/t",
-    other_args => {-undo_action=>"undo", -undo_data=>$undo_data},
-    status     => 200,
-    exists     => 0,
-);
-# XXX create (redo, dry run)
-test_setup_symlink(
-    name       => "create (redo)",
-    symlink    => "/s",
-    target     => "/t",
-    other_args => {-undo_action=>"undo", -undo_data=>$redo_data},
-    status     => 200,
-    exists     => 1,
-);
-
-test_setup_symlink(
-    name       => "replace symlink (dry run)",
-    symlink    => "/s",
-    target     => "/t2",
-    other_args => {-dry_run=>1},
-    status     => 200,
-    skip_test_target => 1,
-    posttest   => sub {
-        my $res = shift;
-        is(readlink("$rootdir/s"), "$rootdir/t", "old symlink unreplaced");
-    },
+    name          => "do not replace file",
+    prepare       => sub { write_file "s", "test" },
+    symlink       => "/s",
+    target        => "/t",
+    other_args    => {},
+    check_unsetup => {is_symlink=>0},
+    arg_error     => 1, # 412
+    cleanup       => sub { unlink "s" },
 );
 test_setup_symlink(
-    name       => "replace symlink (with undo)",
-    symlink    => "/s",
-    target     => "/t2",
-    other_args => {-undo_action=>"do"},
-    status     => 200,
-    posttest   => sub {
-        my $res = shift;
-        $undo_data = $res->[3]{undo_data};
-    },
+    name          => "replace dir",
+    prepare       => sub { mkdir "s"; write_file "s/f", "test" },
+    symlink       => "/s",
+    target        => "/t",
+    other_args    => {replace_dir=>1},
+    check_unsetup => {is_symlink=>0,
+                      extra=>sub {
+                          ok((-f "s/f"), "file inside dir still exists");
+                          is(read_file("s/f"), "test", "file content intact");
+                      }},
+    check_setup   => {target=>"$rootdir/t"},
+    cleanup       => sub { unlink "s" },
 );
 test_setup_symlink(
-    name       => "replace symlink (undo)",
-    symlink    => "/s",
-    target     => "/t2",
-    other_args => {-undo_action=>"undo", -undo_data=>$undo_data},
-    status     => 200,
-    skip_test_target => 1,
-    posttest   => sub {
-        my $res = shift;
-        $redo_data = $res->[3]{undo_data};
-        is(readlink("$rootdir/s"), "$rootdir/t", "old symlink restored");
-    },
+    name          => "do not replace dir",
+    prepare       => sub { mkdir "s" },
+    symlink       => "/s",
+    target        => "/t",
+    other_args    => {},
+    check_unsetup => {is_symlink=>0},
+    arg_error     => 1, # 412
+    cleanup       => sub { rmdir "s" },
 );
-test_setup_symlink(
-    name       => "replace symlink (redo)",
-    symlink    => "/s",
-    target     => "/t2",
-    other_args => {-undo_action=>"undo", -undo_data=>$redo_data},
-    status     => 200,
-    skip_test_target => 1,
-    posttest   => sub {
-        my $res = shift;
-        is(readlink("$rootdir/s"), "$rootdir/t2", "new symlink restored");
-    },
-);
-test_setup_symlink(
-    name       => "do not replace symlink",
-    symlink    => "/s",
-    target     => "/t",
-    other_args => {replace_symlink=>0},
-    status     => 412,
-    skip_test_target => 1,
-    posttest   => sub {
-        my $res = shift;
-        is(readlink("$rootdir/s"), "$rootdir/t2", "old symlink unreplaced");
-    },
-);
-
-# XXX replace file (dry run)
-test_setup_symlink(
-    name       => "replace file (with undo)",
-    presetup   => sub { unlink "$rootdir/s"; write_file "$rootdir/s", "test" },
-    symlink    => "/s",
-    target     => "/t",
-    other_args => {replace_file=>1, -undo_action=>"do"},
-    status     => 200,
-    posttest   => sub {
-        my $res = shift;
-        $undo_data = $res->[3]{undo_data};
-    },
-);
-# XXX replace file (undo, dry run)
-test_setup_symlink(
-    name       => "replace file (undo)",
-    symlink    => "/s",
-    target     => "/t",
-    other_args => {replace_file=>1,
-                   -undo_action=>"undo", -undo_data=>$undo_data},
-    status     => 200,
-    is_symlink => 0,
-    posttest   => sub {
-        my $res = shift;
-        $redo_data = $res->[3]{undo_data};
-        ok((-f "$rootdir/s"), "old file restored");
-        is(read_file("$rootdir/s"), "test", "old file content restored");
-    },
-);
-test_setup_symlink(
-    name       => "do not replace file",
-    symlink    => "/s",
-    target     => "/t",
-    other_args => {},
-    status     => 412,
-    is_symlink => 0,
-    posttest   => sub {
-        my $res = shift;
-        ok((-f "$rootdir/s"), "file unreplaced");
-    },
-);
-# XXX replace file (redo, dry run)
-test_setup_symlink(
-    name       => "replace file (redo)",
-    symlink    => "/s",
-    target     => "/t",
-    other_args => {replace_file=>1,
-                   -undo_action=>"undo", -undo_data=>$redo_data},
-    status     => 200,
-);
-
-# XXX replace dir (dry run)
-test_setup_symlink(
-    name       => "replace dir (with undo)",
-    presetup   => sub {
-        unlink "$rootdir/s"; mkdir "$rootdir/s";
-        write_file "$rootdir/s/f", "test";
-    },
-    symlink    => "/s",
-    target     => "/t",
-    other_args => {replace_dir=>1, -undo_action=>"do"},
-    status     => 200,
-    posttest   => sub {
-        my $res = shift;
-        $undo_data = $res->[3]{undo_data};
-    },
-);
-# XXX replace dir (undo, dry run)
-test_setup_symlink(
-    name       => "replace dir (undo)",
-    symlink    => "/s",
-    target     => "/t",
-    other_args => {replace_dir=>1,
-                   -undo_action=>"undo", -undo_data=>$undo_data},
-    status     => 200,
-    is_symlink => 0,
-    posttest   => sub {
-        my $res = shift;
-        $redo_data = $res->[3]{undo_data};
-        ok((-d "$rootdir/s"), "old dir restored");
-        ok((-f "$rootdir/s/f"), "old dir content restored 1");
-        is(read_file("$rootdir/s/f"), "test", "old dir content restored 2");
-    },
-);
-test_setup_symlink(
-    name       => "do not replace dir",
-    symlink    => "/s",
-    target     => "/t",
-    other_args => {},
-    status     => 412,
-    is_symlink => 0,
-    posttest   => sub {
-        my $res = shift;
-        ok((-d "$rootdir/s"), "dir unreplaced");
-    },
-);
-# XXX replace dir (redo, dry run)
-test_setup_symlink(
-    name       => "replace dir (redo)",
-    symlink    => "/s",
-    target     => "/t",
-    other_args => {replace_dir=>1,
-                   -undo_action=>"undo", -undo_data=>$redo_data},
-    status     => 200,
-);
+goto DONE_TESTING;
 
 # XXX reject invalid undo data?
 
@@ -276,47 +112,38 @@ if (Test::More->builder->is_passing) {
 }
 
 sub test_setup_symlink {
-    my (%args) = @_;
-    subtest "$args{name}" => sub {
+    my (%tssargs) = @_;
 
-        my $symlink = $rootdir . $args{symlink};
-        my $target  = $rootdir . $args{target};
-        my %setup_args = (symlink => $symlink, target => $target);
-        $setup_args{-undo_hint} = {tmp_dir=>"$rootdir/undo"};
-        if ($args{other_args}) {
-            while (my ($k, $v) = each %{$args{other_args}}) {
-                $setup_args{$k} = $v;
-            }
-        }
+    my %tsargs;
 
-        if ($args{presetup}) {
-            $args{presetup}->();
-        }
+    for (qw/name arg_error set_state1 set_state2 prepare cleanup/) {
+        $tsargs{$_} = $tssargs{$_};
+    }
+    $tsargs{function} = \&setup_symlink;
 
-        my $res;
-        eval {
-            $res = setup_symlink(%setup_args);
-        };
-        my $eval_err = $@;
+    my $symlink = $rootdir . $tssargs{symlink};
+    my $target  = $rootdir . $tssargs{target};
+    my %fargs = (symlink => $symlink, target => $target,
+                 -undo_hint => {tmp_dir=>"$rootdir/undo"},
+                 %{$tssargs{other_args} // {}},
+             );
+    $tsargs{args} = \%fargs;
 
-        if ($args{dies}) {
-            ok($eval_err, "dies");
-        }
-        if ($args{status}) {
-            is($res->[0], $args{status}, "status $args{status}")
-                or diag explain($res);
-        }
+    my $check = sub {
+        my %cargs = @_;
 
         my $is_symlink = (-l $symlink);
         my $exists     = (-e _);
         my $cur_target = $is_symlink ? readlink($symlink) : "";
 
-        my $te = $args{exists} // 1;
+        my $te = $cargs{exists} // 1;
         if ($te) {
             ok($exists, "exists");
-            if ($args{is_symlink} // 1) {
+            if ($cargs{is_symlink} // 1) {
                 ok($is_symlink, "is symlink");
-                unless ($args{skip_test_target}) {
+                if (defined $cargs{target}) {
+                    is($cur_target, $cargs{target}, "target is $cargs{target}");
+                } elsif ($cargs{test_target} // 1) {
                     is($cur_target, $target, "target is $target");
                 }
             } else {
@@ -325,13 +152,19 @@ sub test_setup_symlink {
         } else {
             ok(!$exists, "does not exist");
         }
-
-        if ($args{posttest}) {
-            $args{posttest}->($res);
-        }
-
-        if ($args{cleanup}) {
-            unlink $symlink;
+        if ($cargs{extra}) {
+            $cargs{extra}->();
         }
     };
+
+    $tsargs{check_setup}   = sub { $check->(%{$tssargs{check_setup}}) };
+    $tsargs{check_unsetup} = sub { $check->(%{$tssargs{check_unsetup}}) };
+    if ($tssargs{check_state1}) {
+        $tsargs{check_state1} = sub { $check->(%{$tssargs{check_state1}}) };
+    }
+    if ($tssargs{check_state2}) {
+        $tsargs{check_state2} = sub { $check->(%{$tssargs{check_state2}}) };
+    }
+
+    test_setup(%tsargs);
 }

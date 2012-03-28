@@ -22,9 +22,10 @@ requires:
   Log::Any: 0
   Rinci: 1.1.0
   Test::More: 0.96
+  Test::Setup: 0.13
   UUID::Random: 0
   perl: 5.010000
 resources:
   homepage: http://search.cpan.org/dist/Setup-File-Symlink/
   repository: http://github.com/sharyanto/perl-Setup-File-Symlink
-version: 0.13
+version: 0.14

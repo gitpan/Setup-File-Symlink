@@ -17,7 +17,7 @@ my %module_build_args = (
     "Steven Haryanto <stevenharyanto\@gmail.com>"
   ],
   "dist_name" => "Setup-File-Symlink",
-  "dist_version" => "0.13",
+  "dist_version" => "0.14",
   "license" => "perl",
   "module_name" => "Setup::File::Symlink",
   "recommends" => {},
@@ -31,6 +31,7 @@ my %module_build_args = (
     "Log::Any" => 0,
     "Rinci" => "1.1.0",
     "Test::More" => "0.96",
+    "Test::Setup" => "0.13",
     "UUID::Random" => 0,
     "perl" => "5.010000"
   },

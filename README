@@ -2,7 +2,7 @@ NAME
     Setup::File::Symlink - Setup symlink (existence, target)
 
 VERSION
-    version 0.13
+    version 0.14
 
 SYNOPSIS
      use Setup::File::Symlink 'setup_symlink';
@@ -36,69 +36,50 @@ THE SETUP MODULES FAMILY
     Setup::File for more details on the goals, characteristics, and
     implementation of Setup modules family.
 
-FUNCTIONS
-    None are exported by default, but they are exportable.
+SEE ALSO
+    Other modules in Setup:: namespace.
 
-  setup_symlink(%args) -> [STATUS_CODE, ERR_MSG, RESULT]
+FUNCTIONS
+  setup_symlink(%args) -> [status, msg, result, meta]
     Setup symlink (existence, target).
 
     On do, will create symlink which points to specified target. If symlink
     already exists but points to another target, it will be replaced with
-    the correct symlink if replace_symlink option is true. If a file already
+    the correct symlink if replacesymlink option is true. If a file already
     exists, it will be removed (or, backed up to temporary directory) before
-    the symlink is created, if replace_file option is true.
+    the symlink is created, if replacefile option is true.
 
-    If given, -undo_hint should contain {tmp_dir=>...} to specify temporary
+    If given, -undohint should contain {tmpdir=>...} to specify temporary
     directory to save replaced file/dir. Temporary directory defaults to
     ~/.setup, it will be created if not exists.
 
     On undo, will delete symlink if it was created by this function, and
     restore the original symlink/file/dir if it was replaced during do.
 
-    Returns a 3-element arrayref. STATUS_CODE is 200 on success, or an error
-    code between 3xx-5xx (just like in HTTP). ERR_MSG is a string containing
-    error message, RESULT is the actual result.
+    Arguments ('*' denotes required arguments):
 
-    This function supports undo operation. See Sub::Spec::Clause::features
-    for details on how to perform do/undo/redo.
-
-    This function supports dry-run (simulation) mode. To run in dry-run
-    mode, add argument "-dry_run" => 1.
-
-    Arguments ("*" denotes required arguments):
-
-    *   target* => *str*
-
-        Target path of symlink.
-
-    *   symlink* => *str*
-
-        Path to symlink.
-
-        Symlink path needs to be absolute so it's normalized.
-
-    *   create* => *bool* (default 1)
+    *   create* => *bool* (default: 1)
 
         Create if symlink doesn't exist.
 
         If set to false, then setup will fail (412) if this condition is
         encountered.
 
-    *   replace_dir* => *bool* (default 0)
+    *   replace_dir* => *bool* (default: 0)
 
         Replace if there is existing dir.
 
         If set to false, then setup will fail (412) if this condition is
         encountered.
 
-    *   replace_file* => *bool* (default 0)
+    *   replace_file* => *bool* (default: 0)
 
         Replace if there is existing non-symlink file.
 
         If set to false, then setup will fail (412) if this condition is
         encountered.
 
-    *   replace_symlink* => *bool* (default 1)
+    *   replace_symlink* => *bool* (default: 1)
 
         Replace previous symlink if it already exists but doesn't point to
         the wanted target.
@@ -106,8 +87,24 @@ FUNCTIONS
         If set to false, then setup will fail (412) if this condition is
         encountered.
 
-SEE ALSO
-    Other modules in Setup:: namespace.
+    *   symlink* => *str*
+
+        Path to symlink.
+
+        Symlink path needs to be absolute so it's normalized.
+
+    *   target* => *str*
+
+        Target path of symlink.
+
+    Return value:
+
+    Returns an enveloped result (an array). First element (status) is an
+    integer containing HTTP status code (200 means OK, 4xx caller error, 5xx
+    function error). Second element (msg) is a string containing error
+    message, or 'OK' if status is 200. Third element (result) is optional,
+    the actual result. Fourth element (meta) is called result metadata and
+    is optional, a hash that contains extra information.
 
 AUTHOR
     Steven Haryanto <stevenharyanto@gmail.com>

@@ -14,7 +14,7 @@ require Exporter;
 our @ISA       = qw(Exporter);
 our @EXPORT_OK = qw(setup_symlink);
 
-our $VERSION = '0.13'; # VERSION
+our $VERSION = '0.14'; # VERSION
 
 our %SPEC;
 
@@ -250,7 +250,7 @@ Setup::File::Symlink - Setup symlink (existence, target)
 
 =head1 VERSION
 
-version 0.13
+version 0.14
 
 =head1 SYNOPSIS
 
@@ -287,45 +287,57 @@ I use the C<Setup::> namespace for the Setup modules family. See L<Setup::File>
 for more details on the goals, characteristics, and implementation of Setup
 modules family.
 
+=head1 SEE ALSO
+
+Other modules in Setup:: namespace.
+
 =head1 FUNCTIONS
 
-None are exported by default, but they are exportable.
 
-=head2 setup_symlink(%args) -> [STATUS_CODE, ERR_MSG, RESULT]
-
+=head2 setup_symlink(%args) -> [status, msg, result, meta]
 
 Setup symlink (existence, target).
 
 On do, will create symlink which points to specified target. If symlink already
 exists but points to another target, it will be replaced with the correct
-symlink if replace_symlink option is true. If a file already exists, it will be
+symlink if replaceB<symlink option is true. If a file already exists, it will be
 removed (or, backed up to temporary directory) before the symlink is created, if
-replace_file option is true.
+replace>file option is true.
 
-If given, -undo_hint should contain {tmp_dir=>...} to specify temporary
+If given, -undoB<hint should contain {tmp>dir=>...} to specify temporary
 directory to save replaced file/dir. Temporary directory defaults to ~/.setup,
 it will be created if not exists.
 
 On undo, will delete symlink if it was created by this function, and restore the
 original symlink/file/dir if it was replaced during do.
 
-Returns a 3-element arrayref. STATUS_CODE is 200 on success, or an error code
-between 3xx-5xx (just like in HTTP). ERR_MSG is a string containing error
-message, RESULT is the actual result.
-
-This function supports undo operation. See L<Sub::Spec::Clause::features> for
-details on how to perform do/undo/redo.
-
-This function supports dry-run (simulation) mode. To run in dry-run mode, add
-argument C<-dry_run> => 1.
-
-Arguments (C<*> denotes required arguments):
+Arguments ('*' denotes required arguments):
 
 =over 4
 
-=item * B<target>* => I<str>
+=item * B<create>* => I<bool> (default: 1)
 
-Target path of symlink.
+Create if symlink doesn't exist.
+
+If set to false, then setup will fail (412) if this condition is encountered.
+
+=item * B<replace_dir>* => I<bool> (default: 0)
+
+Replace if there is existing dir.
+
+If set to false, then setup will fail (412) if this condition is encountered.
+
+=item * B<replace_file>* => I<bool> (default: 0)
+
+Replace if there is existing non-symlink file.
+
+If set to false, then setup will fail (412) if this condition is encountered.
+
+=item * B<replace_symlink>* => I<bool> (default: 1)
+
+Replace previous symlink if it already exists but doesn't point to the wanted target.
+
+If set to false, then setup will fail (412) if this condition is encountered.
 
 =item * B<symlink>* => I<str>
 
@@ -333,35 +345,15 @@ Path to symlink.
 
 Symlink path needs to be absolute so it's normalized.
 
-=item * B<create>* => I<bool> (default C<1>)
+=item * B<target>* => I<str>
 
-Create if symlink doesn't exist.
-
-If set to false, then setup will fail (412) if this condition is encountered.
-
-=item * B<replace_dir>* => I<bool> (default C<0>)
-
-Replace if there is existing dir.
-
-If set to false, then setup will fail (412) if this condition is encountered.
-
-=item * B<replace_file>* => I<bool> (default C<0>)
-
-Replace if there is existing non-symlink file.
-
-If set to false, then setup will fail (412) if this condition is encountered.
-
-=item * B<replace_symlink>* => I<bool> (default C<1>)
-
-Replace previous symlink if it already exists but doesn't point to the wanted target.
-
-If set to false, then setup will fail (412) if this condition is encountered.
+Target path of symlink.
 
 =back
 
-=head1 SEE ALSO
+Return value:
 
-Other modules in Setup:: namespace.
+Returns an enveloped result (an array). First element (status) is an integer containing HTTP status code (200 means OK, 4xx caller error, 5xx function error). Second element (msg) is a string containing error message, or 'OK' if status is 200. Third element (result) is optional, the actual result. Fourth element (meta) is called result metadata and is optional, a hash that contains extra information.
 
 =head1 AUTHOR
 
