@@ -32,7 +32,7 @@ test_setup_symlink(
     target        => "/t",
     other_args    => {create=>0},
     check_unsetup => {exists=>0},
-    arg_error     => 1, # 412
+    dry_do_error  => 412,
 );
 test_setup_symlink(
     name          => "replace symlink",
@@ -51,7 +51,7 @@ test_setup_symlink(
     target        => "/t2",
     other_args    => {replace_symlink=>0},
     check_unsetup => {target=>"t"},
-    arg_error     => 1, # 412
+    dry_do_error  => 412,
     cleanup       => sub { unlink "s" },
 );
 test_setup_symlink(
@@ -71,7 +71,7 @@ test_setup_symlink(
     target        => "/t",
     other_args    => {},
     check_unsetup => {is_symlink=>0},
-    arg_error     => 1, # 412
+    dry_do_error  => 412,
     cleanup       => sub { unlink "s" },
 );
 test_setup_symlink(
@@ -95,7 +95,7 @@ test_setup_symlink(
     target        => "/t",
     other_args    => {},
     check_unsetup => {is_symlink=>0},
-    arg_error     => 1, # 412
+    dry_do_error  => 412,
     cleanup       => sub { rmdir "s" },
 );
 goto DONE_TESTING;
@@ -116,7 +116,7 @@ sub test_setup_symlink {
 
     my %tsargs;
 
-    for (qw/name arg_error set_state1 set_state2 prepare cleanup/) {
+    for (qw/name dry_do_error do_error set_state1 set_state2 prepare cleanup/) {
         $tsargs{$_} = $tssargs{$_};
     }
     $tsargs{function} = \&setup_symlink;

@@ -14,7 +14,7 @@ require Exporter;
 our @ISA       = qw(Exporter);
 our @EXPORT_OK = qw(setup_symlink);
 
-our $VERSION = '0.14'; # VERSION
+our $VERSION = '0.15'; # VERSION
 
 our %SPEC;
 
@@ -250,7 +250,7 @@ Setup::File::Symlink - Setup symlink (existence, target)
 
 =head1 VERSION
 
-version 0.14
+version 0.15
 
 =head1 SYNOPSIS
 
@@ -273,23 +273,15 @@ version 0.14
 
 =head1 DESCRIPTION
 
-This module provides one function B<setup_symlink>.
-
-This module is part of the Setup modules family.
-
 This module uses L<Log::Any> logging framework.
 
 This module has L<Rinci> metadata.
 
-=head1 THE SETUP MODULES FAMILY
-
-I use the C<Setup::> namespace for the Setup modules family. See L<Setup::File>
-for more details on the goals, characteristics, and implementation of Setup
-modules family.
-
 =head1 SEE ALSO
 
-Other modules in Setup:: namespace.
+L<Setup>
+
+L<Setup::File>
 
 =head1 FUNCTIONS
 

@@ -21,11 +21,12 @@ requires:
   File::chdir: 0
   Log::Any: 0
   Rinci: 1.1.0
+  Setup: 1.0.0
   Test::More: 0.96
-  Test::Setup: 0.13
+  Test::Setup: 1.01
   UUID::Random: 0
   perl: 5.010000
 resources:
   homepage: http://search.cpan.org/dist/Setup-File-Symlink/
   repository: http://github.com/sharyanto/perl-Setup-File-Symlink
-version: 0.14
+version: 0.15
