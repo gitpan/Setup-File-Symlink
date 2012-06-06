@@ -1,5 +1,10 @@
 Revision history for Setup-File-Symlink
 
+0.16    2012-06-06
+
+        No functional changes. Now uses Perinci::Sub::Gen::Undoable.
+
+
 0.15    2012-03-28
 
         No functional changes. Require newer Test::Setup.

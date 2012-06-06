@@ -2,7 +2,7 @@ NAME
     Setup::File::Symlink - Setup symlink (existence, target)
 
 VERSION
-    version 0.15
+    version 0.16
 
 SYNOPSIS
      use Setup::File::Symlink 'setup_symlink';
@@ -42,37 +42,33 @@ FUNCTIONS
     exists, it will be removed (or, backed up to temporary directory) before
     the symlink is created, if replacefile option is true.
 
-    If given, -undohint should contain {tmpdir=>...} to specify temporary
-    directory to save replaced file/dir. Temporary directory defaults to
-    ~/.setup, it will be created if not exists.
-
     On undo, will delete symlink if it was created by this function, and
     restore the original symlink/file/dir if it was replaced during do.
 
     Arguments ('*' denotes required arguments):
 
-    *   create* => *bool* (default: 1)
+    *   create => *bool* (default: 1)
 
         Create if symlink doesn't exist.
 
         If set to false, then setup will fail (412) if this condition is
         encountered.
 
-    *   replace_dir* => *bool* (default: 0)
+    *   replace_dir => *bool* (default: 0)
 
         Replace if there is existing dir.
 
         If set to false, then setup will fail (412) if this condition is
         encountered.
 
-    *   replace_file* => *bool* (default: 0)
+    *   replace_file => *bool* (default: 0)
 
         Replace if there is existing non-symlink file.
 
         If set to false, then setup will fail (412) if this condition is
         encountered.
 
-    *   replace_symlink* => *bool* (default: 1)
+    *   replace_symlink => *bool* (default: 1)
 
         Replace previous symlink if it already exists but doesn't point to
         the wanted target.

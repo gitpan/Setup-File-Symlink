@@ -7,7 +7,11 @@ use Module::Build 0.3601;
 
 my %module_build_args = (
   "build_requires" => {
-    "Module::Build" => "0.3601"
+    "File::Slurp" => 0,
+    "File::chdir" => 0,
+    "Module::Build" => "0.3601",
+    "Test::More" => "0.96",
+    "Test::Setup" => "1.01"
   },
   "configure_requires" => {
     "Module::Build" => "0.3601"
@@ -17,7 +21,7 @@ my %module_build_args = (
     "Steven Haryanto <stevenharyanto\@gmail.com>"
   ],
   "dist_name" => "Setup-File-Symlink",
-  "dist_version" => "0.15",
+  "dist_version" => "0.16",
   "license" => "perl",
   "module_name" => "Setup::File::Symlink",
   "recommends" => {},
@@ -26,13 +30,10 @@ my %module_build_args = (
     "Data::Dump::Partial" => 0,
     "File::Copy::Recursive" => 0,
     "File::Path" => "2.08",
-    "File::Slurp" => 0,
-    "File::chdir" => 0,
     "Log::Any" => 0,
-    "Rinci" => "1.1.0",
+    "Perinci::Sub::Gen::Undoable" => 0,
+    "Rinci" => "1.1.18",
     "Setup" => "1.0.0",
-    "Test::More" => "0.96",
-    "Test::Setup" => "1.01",
     "UUID::Random" => 0,
     "perl" => "5.010000"
   },

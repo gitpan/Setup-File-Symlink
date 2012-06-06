@@ -124,8 +124,7 @@ sub test_setup_symlink {
     my $symlink = $rootdir . $tssargs{symlink};
     my $target  = $rootdir . $tssargs{target};
     my %fargs = (symlink => $symlink, target => $target,
-                 -undo_hint => {tmp_dir=>"$rootdir/undo"},
-                 %{$tssargs{other_args} // {}},
+                 -undo_trash_dir=>$rootdir, %{$tssargs{other_args} // {}},
              );
     $tsargs{args} = \%fargs;
 

@@ -1,0 +1,58 @@
+{
+   "abstract" : "Setup symlink (existence, target)",
+   "author" : [
+      "Steven Haryanto <stevenharyanto@gmail.com>"
+   ],
+   "dynamic_config" : 0,
+   "generated_by" : "Dist::Zilla version 4.300006, CPAN::Meta::Converter version 2.113640",
+   "license" : [
+      "perl_5"
+   ],
+   "meta-spec" : {
+      "url" : "http://search.cpan.org/perldoc?CPAN::Meta::Spec",
+      "version" : "2"
+   },
+   "name" : "Setup-File-Symlink",
+   "prereqs" : {
+      "build" : {
+         "requires" : {
+            "Module::Build" : "0.3601"
+         }
+      },
+      "configure" : {
+         "requires" : {
+            "Module::Build" : "0.3601"
+         }
+      },
+      "runtime" : {
+         "requires" : {
+            "Data::Dump::Partial" : 0,
+            "File::Copy::Recursive" : 0,
+            "File::Path" : "2.08",
+            "Log::Any" : 0,
+            "Perinci::Sub::Gen::Undoable" : 0,
+            "Rinci" : "v1.1.18",
+            "Setup" : "v1.0.0",
+            "UUID::Random" : 0,
+            "perl" : "5.010000"
+         }
+      },
+      "test" : {
+         "requires" : {
+            "File::Slurp" : 0,
+            "File::chdir" : 0,
+            "Test::More" : "0.96",
+            "Test::Setup" : "1.01"
+         }
+      }
+   },
+   "release_status" : "stable",
+   "resources" : {
+      "homepage" : "http://search.cpan.org/dist/Setup-File-Symlink/",
+      "repository" : {
+         "url" : "http://github.com/sharyanto/perl-Setup-File-Symlink"
+      }
+   },
+   "version" : "0.16"
+}
+
