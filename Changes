@@ -1,42 +1,49 @@
 Revision history for Setup-File-Symlink
 
-0.16    2012-06-06
+0.17    2012-06-22 (SHARYANTO)
+
+        No functional changes.
+
+        - rinci: Fix argument position.
+
+
+0.16    2012-06-06 (SHARYANTO)
 
         No functional changes. Now uses Perinci::Sub::Gen::Undoable.
 
 
-0.15    2012-03-28
+0.15    2012-03-28 (SHARYANTO)
 
         No functional changes. Require newer Test::Setup.
 
 
-0.14    2012-03-28
+0.14    2012-03-28 (SHARYANTO)
 
         No functional changes. Replace SubSpec PodWeaver plugin with Perinci.
         Use Test::Setup.
 
 
-0.13    2012-03-02
+0.13    2012-03-02 (SHARYANTO)
 
         No functional changes. dzil tweak to avoid line number change.
 
 
-0.12    2012-03-02
+0.12    2012-03-02 (SHARYANTO)
 
         No functional changes. Replace references to Sub::Spec now to Rinci.
 
 
-0.11    2011-05-18
+0.11    2011-05-18 (SHARYANTO)
 
         No functional changes. Tweak log messages.
 
 
-0.10    2011-05-18
+0.10    2011-05-18 (SHARYANTO)
 
         No functional changes. Changed logging levels.
 
 
-0.09    2011-04-28
+0.09    2011-04-28 (SHARYANTO)
 
         [INCOMPATIBLE CHANGES]
 
@@ -48,7 +55,7 @@ Revision history for Setup-File-Symlink
         - Small fixes.
 
 
-0.08    2011-04-27
+0.08    2011-04-27 (SHARYANTO)
 
         [BUG FIXES]
 
@@ -57,7 +64,7 @@ Revision history for Setup-File-Symlink
         - A couple of small fixes.
 
 
-0.07    2011-04-27
+0.07    2011-04-27 (SHARYANTO)
 
         [ENHANCEMENTS]
 
@@ -67,7 +74,7 @@ Revision history for Setup-File-Symlink
           of do and undo anyway, so we try our best at each step.
 
 
-0.06    2011-04-27
+0.06    2011-04-27 (SHARYANTO)
 
         [ENHANCEMENTS]
 
@@ -76,7 +83,7 @@ Revision history for Setup-File-Symlink
         - Implement replace_file & replace_dir.
 
 
-0.05    2011-04-21
+0.05    2011-04-21 (SHARYANTO)
 
         No functional change.
 
@@ -85,7 +92,7 @@ Revision history for Setup-File-Symlink
         - Rename module from Setup::Symlink to Setup::File::Symlink.
 
 
-0.04    2011-04-21
+0.04    2011-04-21 (SHARYANTO)
 
         No functional change.
 
@@ -94,7 +101,7 @@ Revision history for Setup-File-Symlink
         - Change Abstract to be more consistent with other Setup::* modules.
 
 
-0.03    2011-04-18
+0.03    2011-04-18 (SHARYANTO)
 
         [ETC]
 
@@ -103,7 +110,7 @@ Revision history for Setup-File-Symlink
         - Change terminology: undo/redo info -> undo/redo data.
 
 
-0.02    2011-04-13
+0.02    2011-04-13 (SHARYANTO)
 
         [ETC]
 
@@ -113,6 +120,6 @@ Revision history for Setup-File-Symlink
           (File::chdir, Log::Any) [cpants]
 
 
-0.01    2011-04-08
+0.01    2011-04-08 (SHARYANTO)
 
         - First release.
