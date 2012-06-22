@@ -21,7 +21,7 @@ my %module_build_args = (
     "Steven Haryanto <stevenharyanto\@gmail.com>"
   ],
   "dist_name" => "Setup-File-Symlink",
-  "dist_version" => "0.17",
+  "dist_version" => "0.18",
   "license" => "perl",
   "module_name" => "Setup::File::Symlink",
   "recommends" => {},
@@ -31,7 +31,7 @@ my %module_build_args = (
     "File::Copy::Recursive" => 0,
     "File::Path" => "2.08",
     "Log::Any" => 0,
-    "Perinci::Sub::Gen::Undoable" => 0,
+    "Perinci::Sub::Gen::Undoable" => "0.06",
     "Rinci" => "1.1.18",
     "Setup" => "1.0.0",
     "UUID::Random" => 0,

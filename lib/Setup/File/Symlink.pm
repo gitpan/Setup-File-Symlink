@@ -5,17 +5,16 @@ use strict;
 use warnings;
 use Log::Any '$log';
 
-use Data::Dump::Partial qw(dumpp);
 use File::Copy::Recursive qw(rmove);
 use File::Path qw(remove_tree);
-use Perinci::Sub::Gen::Undoable qw(gen_undoable_func);
+use Perinci::Sub::Gen::Undoable 0.06 qw(gen_undoable_func);
 use UUID::Random;
 
 require Exporter;
 our @ISA       = qw(Exporter);
 our @EXPORT_OK = qw(setup_symlink);
 
-our $VERSION = '0.17'; # VERSION
+our $VERSION = '0.18'; # VERSION
 
 our %SPEC;
 
@@ -107,10 +106,10 @@ _
     },
 
     build_steps => sub {
-        my %args = @_;
+        my $args = shift;
 
-        my $symlink    = $args{symlink};
-        my $target     = $args{target};
+        my $symlink    = $args->{symlink};
+        my $target     = $args->{target};
 
         my $is_symlink = (-l $symlink); # -l performs lstat()
         my $exists     = (-e _);        # now we can use -e
@@ -121,25 +120,25 @@ _
         if ($exists && !$is_symlink) {
             $log->infof("nok: $symlink exists but not a symlink");
             if ($is_dir) {
-                if (!$args{replace_dir}) {
+                if (!$args->{replace_dir}) {
                     return [412, "must replace dir but instructed not to"];
                 }
                 push @steps, ["rm_r"], ["ln"];
             } else {
-                if (!$args{replace_file}) {
+                if (!$args->{replace_file}) {
                     return [412, "must replace file but instructed not to"];
                 }
                 push @steps, ["rm_r"], ["ln"];
             }
         } elsif ($is_symlink && $cur_target ne $target) {
             $log->infof("nok: $symlink doesn't point to correct target");
-            if (!$args{replace_symlink}) {
+            if (!$args->{replace_symlink}) {
                 return [412, "must replace symlink but instructed not to"];
             }
             push @steps, ["rmsym"], ["ln"];
         } elsif (!$exists) {
             $log->infof("nok: $symlink doesn't exist");
-            if (!$args{create}) {
+            if (!$args->{create}) {
                 return [412, "must create symlink but instructed not to"];
             }
             push @steps, ["ln"];
@@ -264,7 +263,7 @@ Setup::File::Symlink - Setup symlink (existence, target)
 
 =head1 VERSION
 
-version 0.17
+version 0.18
 
 =head1 SYNOPSIS
 
