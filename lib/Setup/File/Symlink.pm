@@ -7,14 +7,14 @@ use Log::Any '$log';
 
 use File::Copy::Recursive qw(rmove);
 use File::Path qw(remove_tree);
-use Perinci::Sub::Gen::Undoable 0.06 qw(gen_undoable_func);
+use Perinci::Sub::Gen::Undoable 0.07 qw(gen_undoable_func);
 use UUID::Random;
 
 require Exporter;
 our @ISA       = qw(Exporter);
 our @EXPORT_OK = qw(setup_symlink);
 
-our $VERSION = '0.18'; # VERSION
+our $VERSION = '0.19'; # VERSION
 
 our %SPEC;
 
@@ -92,7 +92,7 @@ _
         },
     },
 
-    hook_check_args => sub {
+    check_args => sub {
         my $args = shift;
         $args->{symlink}         or return [400, "Please specify symlink"];
         defined($args->{target}) or return [400, "Please specify target"];
@@ -154,7 +154,7 @@ _
 It actually moves the file/dir to a unique name in trash and save the unique
 _name as undo data.
 _
-            gen_undo => sub {
+            check => sub {
                 my ($args, $step) = @_;
                 my $f  = $args->{symlink};
                 my $sp = "$args->{-undo_trash_dir}/".
@@ -164,7 +164,7 @@ _
                 }
                 return;
             },
-            run => sub {
+            fix => sub {
                 my ($args, $step, $undo) = @_;
                 my $f  = $args->{symlink};
                 if (rmove $f, $undo->[1]) {
@@ -179,11 +179,11 @@ _
             description => <<'_',
 Rename back file/dir in the trash to the original path.
 _
-            gen_undo => sub {
+            check => sub {
                 my ($args, $step) = @_;
                 return ["rm_r"];
             },
-            run => sub {
+            fix => sub {
                 my ($args, $step, $undo) = @_;
                 my $f  = $args->{symlink};
                 if ((-l $f) || (-e _)) {
@@ -198,7 +198,7 @@ _
             description => <<'_',
 The original symlink target is saved as undo data.
 _
-            gen_undo => sub {
+            check => sub {
                 my ($args, $step) = @_;
                 my $s = $args->{symlink};
                 if ((-l $s) || (-e _)) {
@@ -207,7 +207,7 @@ _
                 }
                 return;
             },
-            run => sub {
+            fix => sub {
                 my ($args, $step, $undo) = @_;
                 my $s = $args->{symlink};
 
@@ -223,7 +223,7 @@ _
             description => <<'_',
 Create symlink which points to arg[1], or by default to 'target'.
 _
-            gen_undo => sub {
+            check => sub {
                 my ($args, $step) = @_;
                 my $s = $args->{symlink};
                 my $t = $step->[1] // $args->{target};
@@ -232,7 +232,7 @@ _
                 }
                 return;
             },
-            run => sub {
+            fix => sub {
                 my ($args, $step, $undo) = @_;
                 my $s = $args->{symlink};
                 my $t = $step->[1] // $args->{target};
@@ -246,8 +246,7 @@ _
     },
 );
 
-die "Can't generate setup_symlink(): $res->[0] - $res->[1]"
-    unless $res->[0] == 200;
+die "Can't generate function: $res->[0] - $res->[1]" unless $res->[0] == 200;
 $SPEC{setup_symlink} = $res->[2]{meta};
 
 1;
@@ -263,7 +262,7 @@ Setup::File::Symlink - Setup symlink (existence, target)
 
 =head1 VERSION
 
-version 0.18
+version 0.19
 
 =head1 SYNOPSIS
 
