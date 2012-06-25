@@ -2,7 +2,7 @@ NAME
     Setup::File::Symlink - Setup symlink (existence, target)
 
 VERSION
-    version 0.19
+    version 0.20
 
 SYNOPSIS
      use Setup::File::Symlink 'setup_symlink';
@@ -32,28 +32,18 @@ SEE ALSO
 
     Setup::File
 
-DESCRIPTION
-    This module has Rinci metadata.
-
 FUNCTIONS
-    None are exported by default, but they are exportable.
-
   setup_symlink(%args) -> [status, msg, result, meta]
     Setup symlink (existence, target).
 
     On do, will create symlink which points to specified target. If symlink
     already exists but points to another target, it will be replaced with
-    the correct symlink if replace*symlink option is true. If a file already
+    the correct symlink if replacesymlink option is true. If a file already
     exists, it will be removed (or, backed up to temporary directory) before
-    the symlink is created, if replace*file option is true.
+    the symlink is created, if replacefile option is true.
 
     On undo, will delete symlink if it was created by this function, and
     restore the original symlink/file/dir if it was replaced during do.
-
-    This function supports undo operation. This function supports dry-run
-    operation. This function is idempotent (repeated invocations with same
-    arguments has the same effect as single invocation). This function can
-    use transactions.
 
     Arguments ('*' denotes required arguments):
 
@@ -95,36 +85,6 @@ FUNCTIONS
     *   target* => *str*
 
         Target path of symlink.
-
-    Special arguments:
-
-    *   -dry_run => *bool*
-
-        Pass -dry_run=>1 to enable simulation mode.
-
-    *   -tx_action => *str*
-
-        You currently can set this to 'rollback'. Usually you do not have to
-        pass this yourself, Perinci::Access::InProcess will do it for you.
-        For more details on transactions, see Rinci::function::Transaction.
-
-    *   -tx_manager => *obj*
-
-        Instance of transaction manager object, usually
-        Perinci::Tx::Manager. Usually you do not have to pass this yourself,
-        Perinci::Access::InProcess will do it for you. For more details on
-        transactions, see Rinci::function::Transaction.
-
-    *   -undo_action => *str*
-
-        To undo, pass -undo_action=>'undo' to function. You will also need
-        to pass -undo_data, unless you use transaction. For more details on
-        undo protocol, see Rinci::function::Undo.
-
-    *   -undo_data => *array*
-
-        Required if you want undo and you do not use transaction. For more
-        details on undo protocol, see Rinci::function::Undo.
 
     Return value:
 

@@ -1,5 +1,10 @@
 Revision history for Setup-File-Symlink
 
+0.20    2012-06-23 (SHARYANTO)
+
+        No functional changes. Adjust to Perinci::Sub::Gen::Undoable 0.08.
+
+
 0.19    2012-06-23 (SHARYANTO)
 
         No functional changes. Adjust to Perinci::Sub::Gen::Undoable 0.07.
