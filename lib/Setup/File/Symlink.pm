@@ -7,14 +7,14 @@ use Log::Any '$log';
 
 use File::Copy::Recursive qw(rmove);
 use File::Path qw(remove_tree);
-use Perinci::Sub::Gen::Undoable 0.08 qw(gen_undoable_func);
+use Perinci::Sub::Gen::Undoable 0.09 qw(gen_undoable_func);
 use UUID::Random;
 
 require Exporter;
 our @ISA       = qw(Exporter);
 our @EXPORT_OK = qw(setup_symlink);
 
-our $VERSION = '0.20'; # VERSION
+our $VERSION = '0.21'; # VERSION
 
 our %SPEC;
 
@@ -160,9 +160,9 @@ _
                 my $sp = "$args->{-undo_trash_dir}/".
                     UUID::Random::generate;
                 if ((-l $f) || (-e _)) {
-                    return ["restore", $sp];
+                    return [200, "OK", ["restore", $sp]];
                 }
-                return;
+                return [200, "OK"];
             },
             fix => sub {
                 my ($args, $step, $undo) = @_;
@@ -179,7 +179,9 @@ _
             description => <<'_',
 Rename back file/dir in the trash to the original path.
 _
-            check => ["rm_r"],
+            check => sub {
+                return [200, "OK", ["rm_r"]];
+            },
             fix => sub {
                 my ($args, $step, $undo) = @_;
                 my $f  = $args->{symlink};
@@ -200,9 +202,9 @@ _
                 my $s = $args->{symlink};
                 if ((-l $s) || (-e _)) {
                     my $t = readlink($s) // "";
-                    return ["ln", $t];
+                    return [200, "OK", ["ln", $t]];
                 }
-                return;
+                return [200, "OK"];
             },
             fix => sub {
                 my ($args, $step, $undo) = @_;
@@ -225,9 +227,9 @@ _
                 my $s = $args->{symlink};
                 my $t = $step->[1] // $args->{target};
                 unless ((-l $s) && readlink($s) eq $t) {
-                    return ["rmsym"];
+                    return [200, "OK", ["rmsym"]];
                 }
-                return;
+                return [200, "OK"];
             },
             fix => sub {
                 my ($args, $step, $undo) = @_;
@@ -259,7 +261,7 @@ Setup::File::Symlink - Setup symlink (existence, target)
 
 =head1 VERSION
 
-version 0.20
+version 0.21
 
 =head1 SYNOPSIS
 
@@ -292,8 +294,15 @@ L<Setup>
 
 L<Setup::File>
 
+=head1 DESCRIPTION
+
+
+This module has L<Rinci> metadata.
+
 =head1 FUNCTIONS
 
+
+None are exported by default, but they are exportable.
 
 =head2 setup_symlink(%args) -> [status, msg, result, meta]
 
@@ -301,12 +310,15 @@ Setup symlink (existence, target).
 
 On do, will create symlink which points to specified target. If symlink already
 exists but points to another target, it will be replaced with the correct
-symlink if replaceB<symlink option is true. If a file already exists, it will be
+symlink if replaceI<symlink option is true. If a file already exists, it will be
 removed (or, backed up to temporary directory) before the symlink is created, if
 replace>file option is true.
 
 On undo, will delete symlink if it was created by this function, and restore the
 original symlink/file/dir if it was replaced during do.
+
+This function supports undo operation. This function supports dry-run operation. This function is idempotent (repeated invocations with same arguments has the same effect as single invocation). This function can use transactions.
+
 
 Arguments ('*' denotes required arguments):
 
@@ -345,6 +357,32 @@ Symlink path needs to be absolute so it's normalized.
 =item * B<target>* => I<str>
 
 Target path of symlink.
+
+=back
+
+Special arguments:
+
+=over 4
+
+=item * B<-dry_run> => I<bool>
+
+Pass -dry_run=>1 to enable simulation mode.
+
+=item * B<-tx_action> => I<str>
+
+You currently can set this to 'rollback'. Usually you do not have to pass this yourself, L<Perinci::Access::InProcess> will do it for you. For more details on transactions, see L<Rinci::function::Transaction>.
+
+=item * B<-tx_manager> => I<obj>
+
+Instance of transaction manager object, usually L<Perinci::Tx::Manager>. Usually you do not have to pass this yourself, L<Perinci::Access::InProcess> will do it for you. For more details on transactions, see L<Rinci::function::Transaction>.
+
+=item * B<-undo_action> => I<str>
+
+To undo, pass -undo_action=>'undo' to function. You will also need to pass -undo_data, unless you use transaction. For more details on undo protocol, see L<Rinci::function::Undo>.
+
+=item * B<-undo_data> => I<array>
+
+Required if you want undo and you do not use transaction. For more details on undo protocol, see L<Rinci::function::Undo>.
 
 =back
 

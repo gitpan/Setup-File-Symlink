@@ -4,7 +4,7 @@
       "Steven Haryanto <stevenharyanto@gmail.com>"
    ],
    "dynamic_config" : 0,
-   "generated_by" : "Dist::Zilla version 4.300015, CPAN::Meta::Converter version 2.120921",
+   "generated_by" : "Dist::Zilla version 4.300006, CPAN::Meta::Converter version 2.113640",
    "license" : [
       "perl_5"
    ],
@@ -26,21 +26,21 @@
       },
       "runtime" : {
          "requires" : {
-            "Data::Dump::Partial" : "0",
-            "File::Copy::Recursive" : "0",
+            "Data::Dump::Partial" : 0,
+            "File::Copy::Recursive" : 0,
             "File::Path" : "2.08",
-            "Log::Any" : "0",
-            "Perinci::Sub::Gen::Undoable" : "0.08",
+            "Log::Any" : 0,
+            "Perinci::Sub::Gen::Undoable" : "0.09",
             "Rinci" : "v1.1.18",
             "Setup" : "v1.0.0",
-            "UUID::Random" : "0",
+            "UUID::Random" : 0,
             "perl" : "5.010000"
          }
       },
       "test" : {
          "requires" : {
-            "File::Slurp" : "0",
-            "File::chdir" : "0",
+            "File::Slurp" : 0,
+            "File::chdir" : 0,
             "Test::More" : "0.96",
             "Test::Setup" : "1.01"
          }
@@ -53,6 +53,6 @@
          "url" : "http://github.com/sharyanto/perl-Setup-File-Symlink"
       }
    },
-   "version" : "0.20"
+   "version" : "0.21"
 }
 
