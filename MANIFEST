@@ -9,7 +9,9 @@ README
 dist.ini
 lib/Setup/File/Symlink.pm
 t/00-compile.t
-t/01-basics.t
+t/ln_s.t
 t/release-pod-coverage.t
 t/release-pod-syntax.t
+t/rmsym.t
+t/setup_symlink.t
 weaver.ini

@@ -26,14 +26,10 @@
       },
       "runtime" : {
          "requires" : {
-            "Data::Dump::Partial" : 0,
-            "File::Copy::Recursive" : 0,
-            "File::Path" : "2.08",
+            "File::Trash::Undoable" : "0.05",
             "Log::Any" : 0,
-            "Perinci::Sub::Gen::Undoable" : "0.09",
-            "Rinci" : "v1.1.18",
-            "Setup" : "v1.0.0",
-            "UUID::Random" : 0,
+            "Rinci" : "v1.1.26",
+            "Setup" : "v1.0.3",
             "perl" : "5.010000"
          }
       },
@@ -42,7 +38,7 @@
             "File::Slurp" : 0,
             "File::chdir" : 0,
             "Test::More" : "0.96",
-            "Test::Setup" : "1.01"
+            "Test::Perinci::Tx::Manager" : "0.30"
          }
       }
    },
@@ -53,6 +49,6 @@
          "url" : "http://github.com/sharyanto/perl-Setup-File-Symlink"
       }
    },
-   "version" : "0.21"
+   "version" : "0.22"
 }
 

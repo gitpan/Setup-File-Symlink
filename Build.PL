@@ -11,7 +11,7 @@ my %module_build_args = (
     "File::chdir" => 0,
     "Module::Build" => "0.3601",
     "Test::More" => "0.96",
-    "Test::Setup" => "1.01"
+    "Test::Perinci::Tx::Manager" => "0.30"
   },
   "configure_requires" => {
     "Module::Build" => "0.3601"
@@ -21,20 +21,16 @@ my %module_build_args = (
     "Steven Haryanto <stevenharyanto\@gmail.com>"
   ],
   "dist_name" => "Setup-File-Symlink",
-  "dist_version" => "0.21",
+  "dist_version" => "0.22",
   "license" => "perl",
   "module_name" => "Setup::File::Symlink",
   "recommends" => {},
   "recursive_test_files" => 1,
   "requires" => {
-    "Data::Dump::Partial" => 0,
-    "File::Copy::Recursive" => 0,
-    "File::Path" => "2.08",
+    "File::Trash::Undoable" => "0.05",
     "Log::Any" => 0,
-    "Perinci::Sub::Gen::Undoable" => "0.09",
-    "Rinci" => "1.1.18",
-    "Setup" => "1.0.0",
-    "UUID::Random" => 0,
+    "Rinci" => "v1.1.26",
+    "Setup" => "v1.0.3",
     "perl" => "5.010000"
   },
   "script_files" => []

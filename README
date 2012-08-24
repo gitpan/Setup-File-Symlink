@@ -2,30 +2,7 @@ NAME
     Setup::File::Symlink - Setup symlink (existence, target)
 
 VERSION
-    version 0.21
-
-SYNOPSIS
-     use Setup::File::Symlink 'setup_symlink';
-
-     # simple usage (doesn't save undo data)
-     my $res = setup_symlink symlink => "/baz", target => "/qux";
-     die unless $res->[0] == 200 || $res->[0] == 304;
-
-     # perform setup and save undo data
-     my $res = setup_symlink symlink => "/foo", target => "/bar",
-                             -undo_action => 'do';
-     die unless $res->[0] == 200 || $res->[0] == 304;
-     my $undo_data = $res->[3]{undo_data};
-
-     # perform undo
-     my $res = setup_symlink symlink => "/symlink", target=>"/target",
-                             -undo_action => "undo", -undo_data=>$undo_data;
-     die unless $res->[0] == 200;
-
-DESCRIPTION
-    This module uses Log::Any logging framework.
-
-    This module has Rinci metadata.
+    version 0.22
 
 SEE ALSO
     Setup
@@ -38,22 +15,109 @@ DESCRIPTION
 FUNCTIONS
     None are exported by default, but they are exportable.
 
+  ln_s(%args) -> [status, msg, result, meta]
+    Create symlink.
+
+    Fixed state: "symlink" exists and points to "target".
+
+    Fixable state: "symlink" doesn't exist.
+
+    This function is idempotent (repeated invocations with same arguments
+    has the same effect as single invocation).
+
+    Arguments ('*' denotes required arguments):
+
+    *   symlink => *str*
+
+        Path to symlink.
+
+    *   target => *str*
+
+        Path to target.
+
+    Special arguments:
+
+    *   -tx_action => *str*
+
+        You currently can set this to 'rollback'. Usually you do not have to
+        pass this yourself, Perinci::Access::InProcess will do it for you.
+        For more details on transactions, see Rinci::function::Transaction.
+
+    *   -tx_manager => *obj*
+
+        Instance of transaction manager object, usually
+        Perinci::Tx::Manager. Usually you do not have to pass this yourself,
+        Perinci::Access::InProcess will do it for you. For more details on
+        transactions, see Rinci::function::Transaction.
+
+    Return value:
+
+    Returns an enveloped result (an array). First element (status) is an
+    integer containing HTTP status code (200 means OK, 4xx caller error, 5xx
+    function error). Second element (msg) is a string containing error
+    message, or 'OK' if status is 200. Third element (result) is optional,
+    the actual result. Fourth element (meta) is called result metadata and
+    is optional, a hash that contains extra information.
+
+  rmsym(%args) -> [status, msg, result, meta]
+    Delete symlink.
+
+    Will not delete non-symlinks.
+
+    Fixed state: "path" doesn't exist.
+
+    Fixable state: "path" exists, is a symlink, (and if "target" is defined,
+    points to "target").
+
+    This function is idempotent (repeated invocations with same arguments
+    has the same effect as single invocation).
+
+    Arguments ('*' denotes required arguments):
+
+    *   path => *str*
+
+    *   target => *str*
+
+        Only delete if existing symlink has this target.
+
+    Special arguments:
+
+    *   -tx_action => *str*
+
+        You currently can set this to 'rollback'. Usually you do not have to
+        pass this yourself, Perinci::Access::InProcess will do it for you.
+        For more details on transactions, see Rinci::function::Transaction.
+
+    *   -tx_manager => *obj*
+
+        Instance of transaction manager object, usually
+        Perinci::Tx::Manager. Usually you do not have to pass this yourself,
+        Perinci::Access::InProcess will do it for you. For more details on
+        transactions, see Rinci::function::Transaction.
+
+    Return value:
+
+    Returns an enveloped result (an array). First element (status) is an
+    integer containing HTTP status code (200 means OK, 4xx caller error, 5xx
+    function error). Second element (msg) is a string containing error
+    message, or 'OK' if status is 200. Third element (result) is optional,
+    the actual result. Fourth element (meta) is called result metadata and
+    is optional, a hash that contains extra information.
+
   setup_symlink(%args) -> [status, msg, result, meta]
     Setup symlink (existence, target).
 
     On do, will create symlink which points to specified target. If symlink
     already exists but points to another target, it will be replaced with
-    the correct symlink if replace*symlink option is true. If a file already
-    exists, it will be removed (or, backed up to temporary directory) before
-    the symlink is created, if replace*file option is true.
+    the correct symlink if "replace_symlink" option is true. If a file/dir
+    already exists and "replace_file"/"replace_dir" option is true, it will
+    be moved (trashed) first before the symlink is created.
 
     On undo, will delete symlink if it was created by this function, and
     restore the original symlink/file/dir if it was replaced during do.
 
-    This function supports undo operation. This function supports dry-run
-    operation. This function is idempotent (repeated invocations with same
-    arguments has the same effect as single invocation). This function can
-    use transactions.
+    This function is idempotent (repeated invocations with same arguments
+    has the same effect as single invocation).
 
     Arguments ('*' denotes required arguments):
 
@@ -98,10 +162,6 @@ FUNCTIONS
 
     Special arguments:
 
-    *   -dry_run => *bool*
-
-        Pass -dry_run=>1 to enable simulation mode.
-
     *   -tx_action => *str*
 
         You currently can set this to 'rollback'. Usually you do not have to
@@ -114,17 +174,6 @@ FUNCTIONS
         Perinci::Tx::Manager. Usually you do not have to pass this yourself,
         Perinci::Access::InProcess will do it for you. For more details on
         transactions, see Rinci::function::Transaction.
-
-    *   -undo_action => *str*
-
-        To undo, pass -undo_action=>'undo' to function. You will also need
-        to pass -undo_data, unless you use transaction. For more details on
-        undo protocol, see Rinci::function::Undo.
-
-    *   -undo_data => *array*
-
-        Required if you want undo and you do not use transaction. For more
-        details on undo protocol, see Rinci::function::Undo.
 
     Return value:
 

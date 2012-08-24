@@ -7,7 +7,7 @@ build_requires:
   File::chdir: 0
   Module::Build: 0.3601
   Test::More: 0.96
-  Test::Setup: 1.01
+  Test::Perinci::Tx::Manager: 0.30
 configure_requires:
   Module::Build: 0.3601
 dynamic_config: 0
@@ -18,16 +18,12 @@ meta-spec:
   version: 1.4
 name: Setup-File-Symlink
 requires:
-  Data::Dump::Partial: 0
-  File::Copy::Recursive: 0
-  File::Path: 2.08
+  File::Trash::Undoable: 0.05
   Log::Any: 0
-  Perinci::Sub::Gen::Undoable: 0.09
-  Rinci: 1.1.18
-  Setup: 1.0.0
-  UUID::Random: 0
+  Rinci: v1.1.26
+  Setup: v1.0.3
   perl: 5.010000
 resources:
   homepage: http://search.cpan.org/dist/Setup-File-Symlink/
   repository: http://github.com/sharyanto/perl-Setup-File-Symlink
-version: 0.21
+version: 0.22
