@@ -2,7 +2,7 @@ NAME
     Setup::File::Symlink - Setup symlink (existence, target)
 
 VERSION
-    version 0.22
+    version 0.23
 
 SEE ALSO
     Setup
@@ -153,8 +153,6 @@ FUNCTIONS
     *   symlink* => *str*
 
         Path to symlink.
-
-        Symlink path needs to be absolute so it's normalized.
 
     *   target* => *str*
 

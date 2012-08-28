@@ -11,7 +11,7 @@ require Exporter;
 our @ISA       = qw(Exporter);
 our @EXPORT_OK = qw(setup_symlink);
 
-our $VERSION = '0.22'; # VERSION
+our $VERSION = '0.23'; # VERSION
 
 our %SPEC;
 
@@ -167,11 +167,6 @@ _
             schema => ['str*' => {match => qr!^/!}],
             req => 1,
             pos => 1,
-            description => <<'_',
-
-Symlink path needs to be absolute so it's normalized.
-
-_
         },
         target => {
             summary => 'Target path of symlink',
@@ -228,8 +223,6 @@ sub setup_symlink {
     # TMP, schema
     my $tx_action    = $args{-tx_action} // '';
     my $symlink      = $args{symlink} or return [400, "Please specify symlink"];
-    $symlink =~ m!^/!
-        or return [400, "Please specify an absolute path for symlink"];
     my $target       = $args{target};
     defined($target) or return [400, "Please specify target"];
     my $create       = $args{create}       // 1;
@@ -307,7 +300,7 @@ Setup::File::Symlink - Setup symlink (existence, target)
 
 =head1 VERSION
 
-version 0.22
+version 0.23
 
 =head1 SEE ALSO
 
@@ -459,8 +452,6 @@ If set to false, then setup will fail (412) if this condition is encountered.
 =item * B<symlink>* => I<str>
 
 Path to symlink.
-
-Symlink path needs to be absolute so it's normalized.
 
 =item * B<target>* => I<str>
 

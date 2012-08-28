@@ -1,5 +1,10 @@
 Revision history for Setup-File-Symlink
 
+0.23    2012-08-28 (SHARYANTO)
+
+        Do not require symlink path to be absolute.
+
+
 0.22    2012-08-24 (SHARYANTO)
 
         [ENHANCEMENTS]
