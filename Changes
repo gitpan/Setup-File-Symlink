@@ -1,5 +1,12 @@
 Revision history for Setup-File-Symlink
 
+0.24    2012-08-30 (SHARYANTO)
+
+        [ENHANCEMENTS]
+
+        - Add argument 'should_exist'.
+
+
 0.23    2012-08-28 (SHARYANTO)
 
         Do not require symlink path to be absolute.

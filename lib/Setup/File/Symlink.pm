@@ -11,7 +11,7 @@ require Exporter;
 our @ISA       = qw(Exporter);
 our @EXPORT_OK = qw(setup_symlink);
 
-our $VERSION = '0.23'; # VERSION
+our $VERSION = '0.24'; # VERSION
 
 our %SPEC;
 
@@ -63,7 +63,7 @@ sub rmsym {
             defined($target) && $curtarget ne $target;
         if ($exists) {
             $log->info("nok: Symlink $path should be removed");
-            push @undo, ['ln_s', {
+            unshift @undo, ['ln_s', {
                 symlink => $path,
                 target  => $target // $curtarget,
             }];
@@ -129,7 +129,7 @@ sub ln_s {
             $curtarget ne $target;
         if (!$exists) {
             $log->info("nok: Symlink $symlink -> $target should be created");
-            push @undo, ['rmsym', {path => $symlink}];
+            unshift @undo, ['rmsym', {path => $symlink}];
         }
         if (@undo) {
             return [200, "Fixable", undef, {undo_actions=>\@undo}];
@@ -151,28 +151,39 @@ $SPEC{setup_symlink} = {
     summary     => "Setup symlink (existence, target)",
     description => <<'_',
 
-On do, will create symlink which points to specified target. If symlink already
-exists but points to another target, it will be replaced with the correct
-symlink if `replace_symlink` option is true. If a file/dir already exists and
-`replace_file`/`replace_dir` option is true, it will be moved (trashed) first
-before the symlink is created.
+When `should_exist=>1` (the default): On do, will create symlink which points to
+specified target. If symlink already exists but points to another target, it
+will be replaced with the correct symlink if `replace_symlink` option is true.
+If a file/dir already exists and `replace_file`/`replace_dir` option is true, it
+will be moved (trashed) first before the symlink is created. On undo, will
+delete symlink if it was created by this function, and restore the original
+symlink/file/dir if it was replaced during do.
 
-On undo, will delete symlink if it was created by this function, and restore the
-original symlink/file/dir if it was replaced during do.
+When `should_exist=>0`: On do, will remove symlink if it exists (and
+`replace_symlink` is true). If `replace_file`/`replace_dir` is true, will also
+remove file/dir. On undo, will restore deleted symlink/file/dir.
 
 _
     args        => {
+        should_exist => {
+            summary => "Whether symlink should exist",
+            schema => ['bool' => {default => 1}],
+        },
         symlink => {
             summary => 'Path to symlink',
             schema => ['str*' => {match => qr!^/!}],
             req => 1,
-            pos => 1,
+            pos => 0,
         },
         target => {
             summary => 'Target path of symlink',
             schema => 'str*',
-            req => 1,
-            pos => 0,
+            req => 0, # XXX only when should_exist=1
+            description => <<'_',
+
+Required, unless `should_exist => 0`.
+
+_
         },
         create => {
             summary => "Create if symlink doesn't exist",
@@ -218,66 +229,89 @@ _
     },
 };
 sub setup_symlink {
+    require UUID::Random;
+
     my %args = @_;
 
     # TMP, schema
     my $tx_action    = $args{-tx_action} // '';
+    my $should_exist = $args{should_exist} // 1;
     my $symlink      = $args{symlink} or return [400, "Please specify symlink"];
     my $target       = $args{target};
-    defined($target) or return [400, "Please specify target"];
+    if ($should_exist) {
+        defined($target) or return [400, "Please specify target"];
+    }
     my $create       = $args{create}       // 1;
     my $replace_file = $args{replace_file} // 0;
     my $replace_dir  = $args{replace_dir}  // 0;
     my $replace_symlink = $args{replace_symlink} // 1;
 
-    my $is_symlink = (-l $symlink); # -l performs lstat()
+    my $is_sym     = (-l $symlink); # -l performs lstat()
     my $exists     = (-e _);    # now we can use -e
     my $is_dir     = (-d _);
-    my $cur_target = $is_symlink ? readlink($symlink) : "";
+    my $cur_target = $is_sym ? readlink($symlink) : "";
+
+    my $taid       = $args{-tx_action_id} // UUID::Random::generate();
+    my $suffix     = substr($taid,0,8);
 
     my (@do, @undo);
 
-    if ($exists && !$is_symlink) {
-        $log->info("nok: ".($is_dir ? "Dir" : "File")." $symlink ".
-                       "should be replaced by symlink");
-        if ($is_dir && !$replace_dir) {
-            return [412, "must replace dir but instructed not to"];
-        } elsif (!$is_dir && !$replace_file) {
-            return [412, "must replace file but instructed not to"];
+    if ($should_exist) {
+        if ($exists && !$is_sym) {
+            $log->info("nok: ".($is_dir ? "Dir" : "File")." $symlink ".
+                           "should be replaced by symlink");
+            if ($is_dir && !$replace_dir) {
+                return [412, "must replace dir but instructed not to"];
+            } elsif (!$is_dir && !$replace_file) {
+                return [412, "must replace file but instructed not to"];
+            }
+            push @do, (
+                ["File::Trash::Undoable::trash",
+                 {path=>$symlink, suffix=>$suffix}],
+                ["ln_s", {symlink=>$symlink, target=>$target}],
+            );
+            unshift @undo, (
+                ["rmsym", {path=>$symlink, target=>$target}],
+                ["File::Trash::Undoable::untrash",
+                 {path=>$symlink, suffix=>$suffix}],
+            );
+        } elsif ($is_sym && $cur_target ne $target) {
+            $log->infof("nok: Symlink $symlink doesn't point to correct target".
+                            " $target");
+            if (!$replace_symlink) {
+                return [412, "must replace symlink but instructed not to"];
+            }
+            push @do, (
+                [rmsym => {path=>$symlink}],
+                [ln_s  => {symlink=>$symlink, target=>$target}],
+            );
+            unshift @undo, (
+                ["rmsym", {path=>$symlink, target=>$target}],
+                ["ln_s", {symlink=>$symlink, target=>$cur_target}],
+            );
+        } elsif (!$exists) {
+            $log->infof("nok: $symlink doesn't exist");
+            if (!$create) {
+                return [412, "must create symlink but instructed not to"];
+            }
+            push @do, (
+                ["ln_s", {symlink=>$symlink, target=>$target}],
+            );
+            unshift @undo, (
+                ["rmsym", {path=>$symlink}],
+            );
         }
-        push @do, (
-            ["File::Trash::Undoable::trash", {path=>$symlink}],
-            ["ln_s", {symlink=>$symlink, target=>$target}],
-        );
-        push @undo, (
-            ["rmsym", {path=>$symlink, target=>$target}],
-            ["File::Trash::Undoable::untrash", {path=>$symlink}],
-        );
-    } elsif ($is_symlink && $cur_target ne $target) {
-        $log->infof("nok: Symlink $symlink doesn't point to correct target".
-                        " $target");
-        if (!$replace_symlink) {
-            return [412, "must replace symlink but instructed not to"];
-        }
-        push @do, (
-            [rmsym => {path=>$symlink}],
-            [ln_s  => {symlink=>$symlink, target=>$target}],
-        );
-        push @undo, (
-            ["rmsym", {path=>$symlink, target=>$target}],
-            ["ln_s", {symlink=>$symlink, target=>$cur_target}],
-        );
-    } elsif (!$exists) {
-        $log->infof("nok: $symlink doesn't exist");
-        if (!$create) {
-            return [412, "must create symlink but instructed not to"];
-        }
-        push @do, (
-            ["ln_s", {symlink=>$symlink, target=>$target}],
-        );
-        push @undo, (
-            ["rmsym", {path=>$symlink}],
-        );
+    } elsif ($exists) {
+        return [412, "must delete symlink but instructed not to"]
+            if $is_sym && !$replace_symlink;
+        return [412, "must delete dir but instructed not to"]
+            if $is_dir && !$replace_dir;
+        return [412, "must delete file but instructed not to"]
+            if !$is_sym && !$is_dir && !$replace_file;
+        push    @do  , ["File::Trash::Undoable::trash",
+                        {path=>$symlink, suffix=>$suffix}];
+        unshift @undo, ["File::Trash::Undoable::untrash",
+                        {path=>$symlink, suffix=>$suffix}];
     }
 
     if (@do) {
@@ -300,7 +334,7 @@ Setup::File::Symlink - Setup symlink (existence, target)
 
 =head1 VERSION
 
-version 0.23
+version 0.24
 
 =head1 SEE ALSO
 
@@ -409,14 +443,17 @@ Returns an enveloped result (an array). First element (status) is an integer con
 
 Setup symlink (existence, target).
 
-On do, will create symlink which points to specified target. If symlink already
-exists but points to another target, it will be replaced with the correct
-symlink if C<replace_symlink> option is true. If a file/dir already exists and
-C<replace_file>/C<replace_dir> option is true, it will be moved (trashed) first
-before the symlink is created.
+When C<should_exist=>1> (the default): On do, will create symlink which points to
+specified target. If symlink already exists but points to another target, it
+will be replaced with the correct symlink if C<replace_symlink> option is true.
+If a file/dir already exists and C<replace_file>/C<replace_dir> option is true, it
+will be moved (trashed) first before the symlink is created. On undo, will
+delete symlink if it was created by this function, and restore the original
+symlink/file/dir if it was replaced during do.
 
-On undo, will delete symlink if it was created by this function, and restore the
-original symlink/file/dir if it was replaced during do.
+When C<should_exist=>0>: On do, will remove symlink if it exists (and
+C<replace_symlink> is true). If C<replace_file>/C<replace_dir> is true, will also
+remove file/dir. On undo, will restore deleted symlink/file/dir.
 
 This function is idempotent (repeated invocations with same arguments has the same effect as single invocation).
 
@@ -449,13 +486,19 @@ Replace previous symlink if it already exists but doesn't point to the wanted ta
 
 If set to false, then setup will fail (412) if this condition is encountered.
 
+=item * B<should_exist> => I<bool> (default: 1)
+
+Whether symlink should exist.
+
 =item * B<symlink>* => I<str>
 
 Path to symlink.
 
-=item * B<target>* => I<str>
+=item * B<target> => I<str>
 
 Target path of symlink.
+
+Required, unless C<should_exist => 0>.
 
 =back
 

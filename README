@@ -2,7 +2,7 @@ NAME
     Setup::File::Symlink - Setup symlink (existence, target)
 
 VERSION
-    version 0.23
+    version 0.24
 
 SEE ALSO
     Setup
@@ -107,14 +107,19 @@ FUNCTIONS
   setup_symlink(%args) -> [status, msg, result, meta]
     Setup symlink (existence, target).
 
-    On do, will create symlink which points to specified target. If symlink
-    already exists but points to another target, it will be replaced with
-    the correct symlink if "replace_symlink" option is true. If a file/dir
-    already exists and "replace_file"/"replace_dir" option is true, it will
-    be moved (trashed) first before the symlink is created.
+    When "should_exist="1> (the default): On do, will create symlink which
+    points to specified target. If symlink already exists but points to
+    another target, it will be replaced with the correct symlink if
+    "replace_symlink" option is true. If a file/dir already exists and
+    "replace_file"/"replace_dir" option is true, it will be moved (trashed)
+    first before the symlink is created. On undo, will delete symlink if it
+    was created by this function, and restore the original symlink/file/dir
+    if it was replaced during do.
 
-    On undo, will delete symlink if it was created by this function, and
-    restore the original symlink/file/dir if it was replaced during do.
+    When "should_exist="0>: On do, will remove symlink if it exists (and
+    "replace_symlink" is true). If "replace_file"/"replace_dir" is true,
+    will also remove file/dir. On undo, will restore deleted
+    symlink/file/dir.
 
     This function is idempotent (repeated invocations with same arguments
     has the same effect as single invocation).
@@ -150,13 +155,19 @@ FUNCTIONS
         If set to false, then setup will fail (412) if this condition is
         encountered.
 
+    *   should_exist => *bool* (default: 1)
+
+        Whether symlink should exist.
+
     *   symlink* => *str*
 
         Path to symlink.
 
-    *   target* => *str*
+    *   target => *str*
 
         Target path of symlink.
+
+        Required, unless "should_exist =" 0>.
 
     Special arguments:
 

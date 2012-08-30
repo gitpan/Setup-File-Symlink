@@ -28,6 +28,17 @@ test_tx_action(
 );
 
 test_tx_action(
+    name          => "fixed",
+    tmpdir        => $tmpdir,
+    reset_state   => sub {
+        unlink "$tmpdir/s"; symlink "/t", "$tmpdir/s";
+    },
+    f             => 'Setup::File::Symlink::ln_s',
+    args          => {symlink=>"$tmpdir/s", target=>"/t"},
+    status        => 304,
+);
+
+test_tx_action(
     name          => "unfixable: s already exists (file)",
     tmpdir        => $tmpdir,
     reset_state   => sub {

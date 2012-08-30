@@ -3,6 +3,7 @@ abstract: 'Setup symlink (existence, target)'
 author:
   - 'Steven Haryanto <stevenharyanto@gmail.com>'
 build_requires:
+  File::Path: 2.07
   File::Slurp: 0
   File::chdir: 0
   Module::Build: 0.3601
@@ -18,12 +19,13 @@ meta-spec:
   version: 1.4
 name: Setup-File-Symlink
 requires:
-  File::Trash::Undoable: 0.05
+  File::Trash::Undoable: 0.06
   Log::Any: 0
   Rinci: v1.1.26
   Setup: v1.0.3
+  UUID::Random: 0
   perl: 5.010000
 resources:
   homepage: http://search.cpan.org/dist/Setup-File-Symlink/
   repository: http://github.com/sharyanto/perl-Setup-File-Symlink
-version: 0.23
+version: 0.24

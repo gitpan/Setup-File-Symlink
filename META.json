@@ -26,15 +26,17 @@
       },
       "runtime" : {
          "requires" : {
-            "File::Trash::Undoable" : "0.05",
+            "File::Trash::Undoable" : "0.06",
             "Log::Any" : 0,
             "Rinci" : "v1.1.26",
             "Setup" : "v1.0.3",
+            "UUID::Random" : 0,
             "perl" : "5.010000"
          }
       },
       "test" : {
          "requires" : {
+            "File::Path" : "2.07",
             "File::Slurp" : 0,
             "File::chdir" : 0,
             "Test::More" : "0.96",
@@ -49,6 +51,6 @@
          "url" : "http://github.com/sharyanto/perl-Setup-File-Symlink"
       }
    },
-   "version" : "0.23"
+   "version" : "0.24"
 }
 

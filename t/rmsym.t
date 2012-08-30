@@ -29,6 +29,17 @@ test_tx_action(
 );
 
 test_tx_action(
+    name   => "fixed",
+    tmpdir => $tmpdir,
+    reset_state => sub {
+        unlink "$tmpdir/s";
+    },
+    f      => 'Setup::File::Symlink::rmsym',
+    args   => {path=>"$tmpdir/s"},
+    status => 304,
+);
+
+test_tx_action(
     name   => "unfixable: target does not match",
     tmpdir => $tmpdir,
     reset_state => sub {

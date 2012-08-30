@@ -7,6 +7,7 @@ use Module::Build 0.3601;
 
 my %module_build_args = (
   "build_requires" => {
+    "File::Path" => "2.07",
     "File::Slurp" => 0,
     "File::chdir" => 0,
     "Module::Build" => "0.3601",
@@ -21,16 +22,17 @@ my %module_build_args = (
     "Steven Haryanto <stevenharyanto\@gmail.com>"
   ],
   "dist_name" => "Setup-File-Symlink",
-  "dist_version" => "0.23",
+  "dist_version" => "0.24",
   "license" => "perl",
   "module_name" => "Setup::File::Symlink",
   "recommends" => {},
   "recursive_test_files" => 1,
   "requires" => {
-    "File::Trash::Undoable" => "0.05",
+    "File::Trash::Undoable" => "0.06",
     "Log::Any" => 0,
     "Rinci" => "v1.1.26",
     "Setup" => "v1.0.3",
+    "UUID::Random" => 0,
     "perl" => "5.010000"
   },
   "script_files" => []
