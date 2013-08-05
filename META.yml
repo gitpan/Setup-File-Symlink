@@ -3,29 +3,31 @@ abstract: 'Setup symlink (existence, target)'
 author:
   - 'Steven Haryanto <stevenharyanto@gmail.com>'
 build_requires:
-  File::Path: 2.07
+  Capture::Tiny: 0
   File::Slurp: 0
   File::chdir: 0
   Module::Build: 0.3601
   Test::More: 0.96
-  Test::Perinci::Tx::Manager: 0.30
+  Test::Perinci::Tx::Manager: 0.40
+  blib: 0
 configure_requires:
   Module::Build: 0.3601
 dynamic_config: 0
-generated_by: 'Dist::Zilla version 4.300006, CPAN::Meta::Converter version 2.113640'
+generated_by: 'Dist::Zilla version 4.300035, CPAN::Meta::Converter version 2.132140'
 license: perl
 meta-spec:
   url: http://module-build.sourceforge.net/META-spec-v1.4.html
   version: 1.4
 name: Setup-File-Symlink
 requires:
+  Capture::Tiny: 0
   File::Trash::Undoable: 0.06
   Log::Any: 0
-  Rinci: v1.1.26
-  Setup: v1.0.3
+  Rinci: v1.1.29
+  Setup: v1.0.4
   UUID::Random: 0
-  perl: 5.010000
+  perl: 5.010001
 resources:
   homepage: http://search.cpan.org/dist/Setup-File-Symlink/
   repository: http://github.com/sharyanto/perl-Setup-File-Symlink
-version: 0.24
+version: 0.25

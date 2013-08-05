@@ -12,6 +12,7 @@ t/00-compile.t
 t/ln_s.t
 t/release-pod-coverage.t
 t/release-pod-syntax.t
+t/release-rinci.t
 t/rmsym.t
 t/setup_symlink.t
 weaver.ini

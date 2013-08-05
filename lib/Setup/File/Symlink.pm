@@ -1,6 +1,6 @@
 package Setup::File::Symlink;
 
-use 5.010;
+use 5.010001;
 use strict;
 use warnings;
 use Log::Any '$log';
@@ -11,7 +11,7 @@ require Exporter;
 our @ISA       = qw(Exporter);
 our @EXPORT_OK = qw(setup_symlink);
 
-our $VERSION = '0.24'; # VERSION
+our $VERSION = '0.25'; # VERSION
 
 our %SPEC;
 
@@ -47,37 +47,40 @@ sub rmsym {
 
     # TMP, schema
     my $tx_action = $args{-tx_action} // '';
-    my $path = $args{path};
+    my $dry_run   = $args{-dry_run};
+    my $path      = $args{path};
     defined($path) or return [400, "Please specify path"];
-    my $target = $args{target};
+    my $target    = $args{target};
 
-    my $is_sym   = (-l $path);
-    my $exists   = $is_sym || (-e _);
+    my $is_sym    = (-l $path);
+    my $exists    = $is_sym || (-e _);
     my $curtarget; $curtarget = readlink($path) if $is_sym;
 
     my @undo;
 
     if ($tx_action eq 'check_state') {
-        return [412, "Not a symlink"] if $exists && !$is_sym;
-        return [412, "Target does not match ($curtarget)"] if $is_sym &&
-            defined($target) && $curtarget ne $target;
+        return [412, "$path is not a symlink"] if $exists && !$is_sym;
+        return [412, "Target of symlink $path does not match ($curtarget)"]
+            if $is_sym && defined($target) && $curtarget ne $target;
         if ($exists) {
-            $log->info("nok: Symlink $path should be removed");
             unshift @undo, ['ln_s', {
                 symlink => $path,
                 target  => $target // $curtarget,
             }];
         }
         if (@undo) {
-            return [200, "Fixable", undef, {undo_actions=>\@undo}];
+            $log->info("(DRY) Deleting symlink $path ...") if $dry_run;
+            return [200, "Symlink $path should be removed", undef,
+                    {undo_actions=>\@undo}];
         } else {
-            return [304, "Fixed"];
+            return [304, "Symlink $path already does not exist"];
         }
     } elsif ($tx_action eq 'fix_state') {
+        $log->info("Deleting symlink $path ...");
         if (unlink $path) {
-            return [200, "Fixed"];
+            return [200, "OK"];
         } else {
-            return [500, "Can't remove symlink: $!"];
+            return [500, "Can't remove symlink $path: $!"];
         }
     }
     [400, "Invalid -tx_action"];
@@ -113,34 +116,38 @@ sub ln_s {
 
     # TMP, schema
     my $tx_action = $args{-tx_action} // '';
-    my $symlink = $args{symlink};
+    my $dry_run   = $args{-dry_run};
+    my $symlink   = $args{symlink};
     defined($symlink) or return [400, "Please specify symlink"];
-    my $target = $args{target};
+    my $target    = $args{target};
     defined($target) or return [400, "Please specify target"];
 
-    my $is_sym   = (-l $symlink);
-    my $exists   = $is_sym || (-e _);
+    my $is_sym    = (-l $symlink);
+    my $exists    = $is_sym || (-e _);
     my $curtarget; $curtarget = readlink($symlink) if $is_sym;
     my @undo;
 
     if ($tx_action eq 'check_state') {
-        return [412, "Path already exists"] if $exists && !$is_sym;
-        return [412, "Symlink points to another target"] if $is_sym &&
+        return [412, "Path $symlink already exists"] if $exists && !$is_sym;
+        return [412, "Symlink $symlink points to another target"] if $is_sym &&
             $curtarget ne $target;
         if (!$exists) {
-            $log->info("nok: Symlink $symlink -> $target should be created");
             unshift @undo, ['rmsym', {path => $symlink}];
         }
         if (@undo) {
-            return [200, "Fixable", undef, {undo_actions=>\@undo}];
+        $log->info("(DRY) Creating symlink $symlink -> $target ...")
+            if $dry_run;
+        return [200, "Symlink $symlink needs to be created", undef,
+                {undo_actions=>\@undo}];
         } else {
-            return [304, "Fixed"];
+            return [304, "Symlink $symlink already exists"];
         }
     } elsif ($tx_action eq 'fix_state') {
+        $log->info("Creating symlink $symlink -> $target ...");
         if (symlink $target, $symlink) {
             return [200, "Fixed"];
         } else {
-            return [500, "Can't symlink: $!"];
+            return [500, "Can't symlink $symlink -> $target: $!"];
         }
     }
     [400, "Invalid -tx_action"];
@@ -235,15 +242,16 @@ sub setup_symlink {
 
     # TMP, schema
     my $tx_action    = $args{-tx_action} // '';
+    my $dry_run      = $args{-dry_run};
     my $should_exist = $args{should_exist} // 1;
     my $symlink      = $args{symlink} or return [400, "Please specify symlink"];
     my $target       = $args{target};
     if ($should_exist) {
         defined($target) or return [400, "Please specify target"];
     }
-    my $create       = $args{create}       // 1;
-    my $replace_file = $args{replace_file} // 0;
-    my $replace_dir  = $args{replace_dir}  // 0;
+    my $create          = $args{create}       // 1;
+    my $replace_file    = $args{replace_file} // 0;
+    my $replace_dir     = $args{replace_dir}  // 0;
     my $replace_symlink = $args{replace_symlink} // 1;
 
     my $is_sym     = (-l $symlink); # -l performs lstat()
@@ -258,13 +266,15 @@ sub setup_symlink {
 
     if ($should_exist) {
         if ($exists && !$is_sym) {
-            $log->info("nok: ".($is_dir ? "Dir" : "File")." $symlink ".
-                           "should be replaced by symlink");
             if ($is_dir && !$replace_dir) {
-                return [412, "must replace dir but instructed not to"];
+                return [412, "Must replace dir $symlink with symlink ".
+                            "but instructed not to"];
             } elsif (!$is_dir && !$replace_file) {
-                return [412, "must replace file but instructed not to"];
+                return [412, "Must replace file $symlink with symlink ".
+                            "but instructed not to"];
             }
+            $log->info("(DRY) Replacing file/dir $symlink with symlink ...")
+                if $dry_run;
             push @do, (
                 ["File::Trash::Undoable::trash",
                  {path=>$symlink, suffix=>$suffix}],
@@ -276,11 +286,11 @@ sub setup_symlink {
                  {path=>$symlink, suffix=>$suffix}],
             );
         } elsif ($is_sym && $cur_target ne $target) {
-            $log->infof("nok: Symlink $symlink doesn't point to correct target".
-                            " $target");
             if (!$replace_symlink) {
-                return [412, "must replace symlink but instructed not to"];
+                return [412, "Must replace symlink $symlink ".
+                            "but instructed not to"];
             }
+            $log->info("(DRY) Replacing symlink $symlink ...") if $dry_run;
             push @do, (
                 [rmsym => {path=>$symlink}],
                 [ln_s  => {symlink=>$symlink, target=>$target}],
@@ -290,10 +300,11 @@ sub setup_symlink {
                 ["ln_s", {symlink=>$symlink, target=>$cur_target}],
             );
         } elsif (!$exists) {
-            $log->infof("nok: $symlink doesn't exist");
             if (!$create) {
-                return [412, "must create symlink but instructed not to"];
+                return [412, "Must create symlink $symlink ".
+                            "but instructed not to"];
             }
+            $log->info("(DRY) Creating symlink $symlink ...") if $dry_run;
             push @do, (
                 ["ln_s", {symlink=>$symlink, target=>$target}],
             );
@@ -302,12 +313,13 @@ sub setup_symlink {
             );
         }
     } elsif ($exists) {
-        return [412, "must delete symlink but instructed not to"]
+        return [412, "Must delete symlink $symlink but instructed not to"]
             if $is_sym && !$replace_symlink;
-        return [412, "must delete dir but instructed not to"]
+        return [412, "Must delete dir $symlink but instructed not to"]
             if $is_dir && !$replace_dir;
-        return [412, "must delete file but instructed not to"]
+        return [412, "Must delete file $symlink but instructed not to"]
             if !$is_sym && !$is_dir && !$replace_file;
+        $log->info("(DRY) Removing symlink $symlink ...") if $dry_run;
         push    @do  , ["File::Trash::Undoable::trash",
                         {path=>$symlink, suffix=>$suffix}];
         unshift @undo, ["File::Trash::Undoable::untrash",
@@ -315,18 +327,20 @@ sub setup_symlink {
     }
 
     if (@do) {
-        return [200,"Fixable",undef, {do_actions=>\@do, undo_actions=>\@undo}];
+        return [200, "", undef, {do_actions=>\@do, undo_actions=>\@undo}];
     } else {
-        return [304, "Fixed"];
+        return [304, "Already fixed"];
     }
 }
 
 1;
 # ABSTRACT: Setup symlink (existence, target)
 
-
 __END__
+
 =pod
+
+=encoding utf-8
 
 =head1 NAME
 
@@ -334,7 +348,7 @@ Setup::File::Symlink - Setup symlink (existence, target)
 
 =head1 VERSION
 
-version 0.24
+version 0.25
 
 =head1 SEE ALSO
 
@@ -342,10 +356,18 @@ L<Setup>
 
 L<Setup::File>
 
+=head1 AUTHOR
+
+Steven Haryanto <stevenharyanto@gmail.com>
+
+=head1 COPYRIGHT AND LICENSE
+
+This software is copyright (c) 2013 by Steven Haryanto.
+
+This is free software; you can redistribute it and/or modify it under
+the same terms as the Perl 5 programming language system itself.
+
 =head1 DESCRIPTION
-
-
-This module has L<Rinci> metadata.
 
 =head1 FUNCTIONS
 
@@ -354,13 +376,11 @@ None are exported by default, but they are exportable.
 
 =head2 ln_s(%args) -> [status, msg, result, meta]
 
-Create symlink.
-
 Fixed state: C<symlink> exists and points to C<target>.
 
 Fixable state: C<symlink> doesn't exist.
 
-This function is idempotent (repeated invocations with same arguments has the same effect as single invocation).
+This function is idempotent (repeated invocations with same arguments has the same effect as single invocation). This function supports transactions.
 
 
 Arguments ('*' denotes required arguments):
@@ -383,11 +403,23 @@ Special arguments:
 
 =item * B<-tx_action> => I<str>
 
-You currently can set this to 'rollback'. Usually you do not have to pass this yourself, L<Perinci::Access::InProcess> will do it for you. For more details on transactions, see L<Rinci::function::Transaction>.
+For more information on transaction, see L<Rinci::Transaction>.
 
-=item * B<-tx_manager> => I<obj>
+=item * B<-tx_action_id> => I<str>
 
-Instance of transaction manager object, usually L<Perinci::Tx::Manager>. Usually you do not have to pass this yourself, L<Perinci::Access::InProcess> will do it for you. For more details on transactions, see L<Rinci::function::Transaction>.
+For more information on transaction, see L<Rinci::Transaction>.
+
+=item * B<-tx_recovery> => I<str>
+
+For more information on transaction, see L<Rinci::Transaction>.
+
+=item * B<-tx_rollback> => I<str>
+
+For more information on transaction, see L<Rinci::Transaction>.
+
+=item * B<-tx_v> => I<str>
+
+For more information on transaction, see L<Rinci::Transaction>.
 
 =back
 
@@ -397,8 +429,6 @@ Returns an enveloped result (an array). First element (status) is an integer con
 
 =head2 rmsym(%args) -> [status, msg, result, meta]
 
-Delete symlink.
-
 Will not delete non-symlinks.
 
 Fixed state: C<path> doesn't exist.
@@ -406,7 +436,7 @@ Fixed state: C<path> doesn't exist.
 Fixable state: C<path> exists, is a symlink, (and if C<target> is defined, points
 to C<target>).
 
-This function is idempotent (repeated invocations with same arguments has the same effect as single invocation).
+This function is idempotent (repeated invocations with same arguments has the same effect as single invocation). This function supports transactions.
 
 
 Arguments ('*' denotes required arguments):
@@ -427,11 +457,23 @@ Special arguments:
 
 =item * B<-tx_action> => I<str>
 
-You currently can set this to 'rollback'. Usually you do not have to pass this yourself, L<Perinci::Access::InProcess> will do it for you. For more details on transactions, see L<Rinci::function::Transaction>.
+For more information on transaction, see L<Rinci::Transaction>.
 
-=item * B<-tx_manager> => I<obj>
+=item * B<-tx_action_id> => I<str>
 
-Instance of transaction manager object, usually L<Perinci::Tx::Manager>. Usually you do not have to pass this yourself, L<Perinci::Access::InProcess> will do it for you. For more details on transactions, see L<Rinci::function::Transaction>.
+For more information on transaction, see L<Rinci::Transaction>.
+
+=item * B<-tx_recovery> => I<str>
+
+For more information on transaction, see L<Rinci::Transaction>.
+
+=item * B<-tx_rollback> => I<str>
+
+For more information on transaction, see L<Rinci::Transaction>.
+
+=item * B<-tx_v> => I<str>
+
+For more information on transaction, see L<Rinci::Transaction>.
 
 =back
 
@@ -440,8 +482,6 @@ Return value:
 Returns an enveloped result (an array). First element (status) is an integer containing HTTP status code (200 means OK, 4xx caller error, 5xx function error). Second element (msg) is a string containing error message, or 'OK' if status is 200. Third element (result) is optional, the actual result. Fourth element (meta) is called result metadata and is optional, a hash that contains extra information.
 
 =head2 setup_symlink(%args) -> [status, msg, result, meta]
-
-Setup symlink (existence, target).
 
 When C<should_exist=>1> (the default): On do, will create symlink which points to
 specified target. If symlink already exists but points to another target, it
@@ -455,7 +495,7 @@ When C<should_exist=>0>: On do, will remove symlink if it exists (and
 C<replace_symlink> is true). If C<replace_file>/C<replace_dir> is true, will also
 remove file/dir. On undo, will restore deleted symlink/file/dir.
 
-This function is idempotent (repeated invocations with same arguments has the same effect as single invocation).
+This function is idempotent (repeated invocations with same arguments has the same effect as single invocation). This function supports transactions.
 
 
 Arguments ('*' denotes required arguments):
@@ -508,11 +548,23 @@ Special arguments:
 
 =item * B<-tx_action> => I<str>
 
-You currently can set this to 'rollback'. Usually you do not have to pass this yourself, L<Perinci::Access::InProcess> will do it for you. For more details on transactions, see L<Rinci::function::Transaction>.
+For more information on transaction, see L<Rinci::Transaction>.
 
-=item * B<-tx_manager> => I<obj>
+=item * B<-tx_action_id> => I<str>
 
-Instance of transaction manager object, usually L<Perinci::Tx::Manager>. Usually you do not have to pass this yourself, L<Perinci::Access::InProcess> will do it for you. For more details on transactions, see L<Rinci::function::Transaction>.
+For more information on transaction, see L<Rinci::Transaction>.
+
+=item * B<-tx_recovery> => I<str>
+
+For more information on transaction, see L<Rinci::Transaction>.
+
+=item * B<-tx_rollback> => I<str>
+
+For more information on transaction, see L<Rinci::Transaction>.
+
+=item * B<-tx_v> => I<str>
+
+For more information on transaction, see L<Rinci::Transaction>.
 
 =back
 
@@ -520,16 +572,4 @@ Return value:
 
 Returns an enveloped result (an array). First element (status) is an integer containing HTTP status code (200 means OK, 4xx caller error, 5xx function error). Second element (msg) is a string containing error message, or 'OK' if status is 200. Third element (result) is optional, the actual result. Fourth element (meta) is called result metadata and is optional, a hash that contains extra information.
 
-=head1 AUTHOR
-
-Steven Haryanto <stevenharyanto@gmail.com>
-
-=head1 COPYRIGHT AND LICENSE
-
-This software is copyright (c) 2012 by Steven Haryanto.
-
-This is free software; you can redistribute it and/or modify it under
-the same terms as the Perl 5 programming language system itself.
-
 =cut
-

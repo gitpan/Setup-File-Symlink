@@ -2,28 +2,34 @@ NAME
     Setup::File::Symlink - Setup symlink (existence, target)
 
 VERSION
-    version 0.24
+    version 0.25
 
 SEE ALSO
     Setup
 
     Setup::File
 
-DESCRIPTION
-    This module has Rinci metadata.
+AUTHOR
+    Steven Haryanto <stevenharyanto@gmail.com>
 
+COPYRIGHT AND LICENSE
+    This software is copyright (c) 2013 by Steven Haryanto.
+
+    This is free software; you can redistribute it and/or modify it under
+    the same terms as the Perl 5 programming language system itself.
+
+DESCRIPTION
 FUNCTIONS
     None are exported by default, but they are exportable.
 
   ln_s(%args) -> [status, msg, result, meta]
-    Create symlink.
-
     Fixed state: "symlink" exists and points to "target".
 
     Fixable state: "symlink" doesn't exist.
 
     This function is idempotent (repeated invocations with same arguments
-    has the same effect as single invocation).
+    has the same effect as single invocation). This function supports
+    transactions.
 
     Arguments ('*' denotes required arguments):
 
@@ -39,16 +45,23 @@ FUNCTIONS
 
     *   -tx_action => *str*
 
-        You currently can set this to 'rollback'. Usually you do not have to
-        pass this yourself, Perinci::Access::InProcess will do it for you.
-        For more details on transactions, see Rinci::function::Transaction.
+        For more information on transaction, see Rinci::Transaction.
 
-    *   -tx_manager => *obj*
+    *   -tx_action_id => *str*
 
-        Instance of transaction manager object, usually
-        Perinci::Tx::Manager. Usually you do not have to pass this yourself,
-        Perinci::Access::InProcess will do it for you. For more details on
-        transactions, see Rinci::function::Transaction.
+        For more information on transaction, see Rinci::Transaction.
+
+    *   -tx_recovery => *str*
+
+        For more information on transaction, see Rinci::Transaction.
+
+    *   -tx_rollback => *str*
+
+        For more information on transaction, see Rinci::Transaction.
+
+    *   -tx_v => *str*
+
+        For more information on transaction, see Rinci::Transaction.
 
     Return value:
 
@@ -60,8 +73,6 @@ FUNCTIONS
     is optional, a hash that contains extra information.
 
   rmsym(%args) -> [status, msg, result, meta]
-    Delete symlink.
-
     Will not delete non-symlinks.
 
     Fixed state: "path" doesn't exist.
@@ -70,7 +81,8 @@ FUNCTIONS
     points to "target").
 
     This function is idempotent (repeated invocations with same arguments
-    has the same effect as single invocation).
+    has the same effect as single invocation). This function supports
+    transactions.
 
     Arguments ('*' denotes required arguments):
 
@@ -84,16 +96,23 @@ FUNCTIONS
 
     *   -tx_action => *str*
 
-        You currently can set this to 'rollback'. Usually you do not have to
-        pass this yourself, Perinci::Access::InProcess will do it for you.
-        For more details on transactions, see Rinci::function::Transaction.
+        For more information on transaction, see Rinci::Transaction.
 
-    *   -tx_manager => *obj*
+    *   -tx_action_id => *str*
 
-        Instance of transaction manager object, usually
-        Perinci::Tx::Manager. Usually you do not have to pass this yourself,
-        Perinci::Access::InProcess will do it for you. For more details on
-        transactions, see Rinci::function::Transaction.
+        For more information on transaction, see Rinci::Transaction.
+
+    *   -tx_recovery => *str*
+
+        For more information on transaction, see Rinci::Transaction.
+
+    *   -tx_rollback => *str*
+
+        For more information on transaction, see Rinci::Transaction.
+
+    *   -tx_v => *str*
+
+        For more information on transaction, see Rinci::Transaction.
 
     Return value:
 
@@ -105,8 +124,6 @@ FUNCTIONS
     is optional, a hash that contains extra information.
 
   setup_symlink(%args) -> [status, msg, result, meta]
-    Setup symlink (existence, target).
-
     When "should_exist="1> (the default): On do, will create symlink which
     points to specified target. If symlink already exists but points to
     another target, it will be replaced with the correct symlink if
@@ -122,7 +139,8 @@ FUNCTIONS
     symlink/file/dir.
 
     This function is idempotent (repeated invocations with same arguments
-    has the same effect as single invocation).
+    has the same effect as single invocation). This function supports
+    transactions.
 
     Arguments ('*' denotes required arguments):
 
@@ -173,16 +191,23 @@ FUNCTIONS
 
     *   -tx_action => *str*
 
-        You currently can set this to 'rollback'. Usually you do not have to
-        pass this yourself, Perinci::Access::InProcess will do it for you.
-        For more details on transactions, see Rinci::function::Transaction.
+        For more information on transaction, see Rinci::Transaction.
 
-    *   -tx_manager => *obj*
+    *   -tx_action_id => *str*
 
-        Instance of transaction manager object, usually
-        Perinci::Tx::Manager. Usually you do not have to pass this yourself,
-        Perinci::Access::InProcess will do it for you. For more details on
-        transactions, see Rinci::function::Transaction.
+        For more information on transaction, see Rinci::Transaction.
+
+    *   -tx_recovery => *str*
+
+        For more information on transaction, see Rinci::Transaction.
+
+    *   -tx_rollback => *str*
+
+        For more information on transaction, see Rinci::Transaction.
+
+    *   -tx_v => *str*
+
+        For more information on transaction, see Rinci::Transaction.
 
     Return value:
 
@@ -192,13 +217,4 @@ FUNCTIONS
     message, or 'OK' if status is 200. Third element (result) is optional,
     the actual result. Fourth element (meta) is called result metadata and
     is optional, a hash that contains extra information.
-
-AUTHOR
-    Steven Haryanto <stevenharyanto@gmail.com>
-
-COPYRIGHT AND LICENSE
-    This software is copyright (c) 2012 by Steven Haryanto.
-
-    This is free software; you can redistribute it and/or modify it under
-    the same terms as the Perl 5 programming language system itself.
 

@@ -1,5 +1,11 @@
 Revision history for Setup-File-Symlink
 
+0.25    2013-08-05 (SHARYANTO)
+
+        - No functional changes. Tweak error messages to give more
+          details.
+
+
 0.24    2012-08-30 (SHARYANTO)
 
         [ENHANCEMENTS]
@@ -9,7 +15,7 @@ Revision history for Setup-File-Symlink
 
 0.23    2012-08-28 (SHARYANTO)
 
-        Do not require symlink path to be absolute.
+        - Do not require symlink path to be absolute.
 
 
 0.22    2012-08-24 (SHARYANTO)
@@ -24,65 +30,70 @@ Revision history for Setup-File-Symlink
 
 0.21    2012-07-04 (SHARYANTO)
 
-        No functional changes. Adjust to Perinci::Sub::Gen::Undoable 0.09.
+        - No functional changes. Adjust to Perinci::Sub::Gen::Undoable
+          0.09.
 
 
 0.20    2012-06-23 (SHARYANTO)
 
-        No functional changes. Adjust to Perinci::Sub::Gen::Undoable 0.08.
+        - No functional changes. Adjust to Perinci::Sub::Gen::Undoable
+          0.08.
 
 
 0.19    2012-06-23 (SHARYANTO)
 
-        No functional changes. Adjust to Perinci::Sub::Gen::Undoable 0.07.
+        - No functional changes. Adjust to Perinci::Sub::Gen::Undoable
+          0.07.
 
 
 0.18    2012-06-22 (SHARYANTO)
 
-        No functional changes. Adjust to Perinci::Sub::Gen::Undoable 0.06.
+        - No functional changes. Adjust to Perinci::Sub::Gen::Undoable
+          0.06.
 
 
 0.17    2012-06-22 (SHARYANTO)
 
-        No functional changes.
+        - No functional changes.
 
         - rinci: Fix argument position.
 
 
 0.16    2012-06-06 (SHARYANTO)
 
-        No functional changes. Now uses Perinci::Sub::Gen::Undoable.
+        - No functional changes. Now uses Perinci::Sub::Gen::Undoable.
 
 
 0.15    2012-03-28 (SHARYANTO)
 
-        No functional changes. Require newer Test::Setup.
+        - No functional changes. Require newer Test::Setup.
 
 
 0.14    2012-03-28 (SHARYANTO)
 
-        No functional changes. Replace SubSpec PodWeaver plugin with Perinci.
-        Use Test::Setup.
+        - No functional changes. Replace SubSpec PodWeaver plugin with
+          Perinci.  Use Test::Setup.
 
 
 0.13    2012-03-02 (SHARYANTO)
 
-        No functional changes. dzil tweak to avoid line number change.
+        - No functional changes. dzil tweak to avoid line number change.
 
 
 0.12    2012-03-02 (SHARYANTO)
 
-        No functional changes. Replace references to Sub::Spec now to Rinci.
+        - No functional changes. Replace references to Sub::Spec now
+          to Rinci.
 
 
 0.11    2011-05-18 (SHARYANTO)
 
-        No functional changes. Tweak log messages.
+        - No functional changes. Tweak log messages.
 
 
 0.10    2011-05-18 (SHARYANTO)
 
-        No functional changes. Changed logging levels.
+        - No functional changes. Changed logging levels.
 
 
 0.09    2011-04-28 (SHARYANTO)
@@ -127,7 +138,7 @@ Revision history for Setup-File-Symlink
 
 0.05    2011-04-21 (SHARYANTO)
 
-        No functional change.
+        - No functional change.
 
         [INCOMPATIBLE CHANGE]
 
@@ -136,11 +147,12 @@ Revision history for Setup-File-Symlink
 
 0.04    2011-04-21 (SHARYANTO)
 
-        No functional change.
+        - No functional change.
 
         [ETC]
 
-        - Change Abstract to be more consistent with other Setup::* modules.
+        - Change Abstract to be more consistent with other Setup::*
+          modules.
 
 
 0.03    2011-04-18 (SHARYANTO)
