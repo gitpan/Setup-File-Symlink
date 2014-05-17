@@ -7,7 +7,7 @@ use Test::More 0.96;
 
 use File::chdir;
 use File::Path qw(remove_tree);
-use File::Slurp;
+use File::Slurp::Tiny qw(write_file);
 use File::Temp qw(tempdir);
 use Setup::File::Symlink qw(setup_symlink);
 use Test::Perinci::Tx::Manager qw(test_tx_action);

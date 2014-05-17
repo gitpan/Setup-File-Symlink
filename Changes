@@ -1,5 +1,12 @@
 Revision history for Setup-File-Symlink
 
+0.26    2014-05-17 (SHARYANTO)
+
+        - No functional changes.
+
+        - Replace File::Slurp with File::Slurp::Tiny.
+
+
 0.25    2013-08-05 (SHARYANTO)
 
         - No functional changes. Tweak error messages to give more

@@ -6,7 +6,7 @@ use warnings;
 use Test::More 0.96;
 
 use File::chdir;
-use File::Slurp;
+use File::Slurp::Tiny qw(write_file);
 use File::Temp qw(tempdir);
 use Setup::File::Symlink;
 use Test::Perinci::Tx::Manager qw(test_tx_action);
